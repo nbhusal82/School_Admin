@@ -8,12 +8,15 @@ import {
 
 const Team = () => {
   const { data: teamMembers = [], isLoading } = useGetTeamQuery();
+
   const [createMember] = useCreateTeamMutation();
   const [updateMember] = useUpdateTeamMutation();
   const [deleteMember] = useDeleteTeamMutation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
+
+  const imgurl = import.meta.env.VITE_IMAGE_URL;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -40,7 +43,7 @@ const Team = () => {
     });
     setModalOpen(true);
   };
-  const imgurl = import.meta.env.VITE_IMAGE_URL;
+
   const handleEdit = (member) => {
     setEditingMember(member);
     setFormData({
@@ -58,7 +61,9 @@ const Team = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const data = new FormData();
+
     Object.keys(formData).forEach((key) => {
       if (key === "image") {
         if (formData.image) data.append("image", formData.image);
@@ -67,138 +72,115 @@ const Team = () => {
       }
     });
 
-    if (editingMember) {
-      await updateMember({ id: editingMember.id, data });
-    } else {
-      await createMember(data);
+    try {
+      if (editingMember) {
+        await updateMember({ id: editingMember.id, data }).unwrap();
+      } else {
+        await createMember(data).unwrap();
+      }
+
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
     }
-    setModalOpen(false);
   };
 
-  const formatDate = (date) =>
-    new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const handleDelete = async (id) => {
+    if (window.confirm("Delete this member?")) {
+      await deleteMember(id).unwrap();
+    }
+  };
 
-  if (isLoading)
-    return (
-      <div className="p-10 text-center font-bold text-blue-600">
-        Loading Team Dashboard...
-      </div>
-    );
+  const formatDate = (date) => new Date(date).toLocaleDateString();
+
+  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto flex justify-between items-center mb-8">
+      {/* Header */}
+
+      <div className="flex justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-800">
-            Team Management
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Manage faculty and staff members
-          </p>
+          <h1 className="text-2xl font-bold text-gray-800">Team Management</h1>
+          <p className="text-sm text-gray-500">Manage school team members</p>
         </div>
+
         <button
           onClick={openAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg"
+          className="bg-blue-600 text-white px-5 py-2 rounded-lg"
         >
-          + Add Team Member
+          + Add Member
         </button>
       </div>
 
-      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="bg-gray-50 border-b">
-              <th className="p-4 font-bold text-gray-400 uppercase text-xs">
-                ID
-              </th>
-              <th className="p-4 font-bold text-gray-600 uppercase text-xs">
-                Member
-              </th>
-              <th className="p-4 font-bold text-gray-600 uppercase text-xs">
-                Position & Role
-              </th>
-              <th className="p-4 font-bold text-gray-600 uppercase text-xs">
-                Contact
-              </th>
-              <th className="p-4 font-bold text-gray-600 uppercase text-xs">
-                Category
-              </th>
-              <th className="p-4 font-bold text-gray-600 uppercase text-xs text-center">
-                Actions
-              </th>
+      {/* Table */}
+
+      <div className="bg-white rounded-xl shadow overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3">ID</th>
+              <th className="p-3">Member</th>
+              <th className="p-3">Position</th>
+              <th className="p-3">Contact</th>
+              <th className="p-3">Category</th>
+              <th className="p-3 text-center">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+
+          <tbody>
             {teamMembers.map((member) => (
-              <tr
-                key={member.id}
-                className="hover:bg-blue-50/20 transition-all"
-              >
-                <td className="p-4 text-gray-400 font-mono text-xs">
-                  #{member.id}
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={`${imgurl}/${member.image}`}
-                      className="w-12 h-12 rounded-full object-cover border shadow-sm"
-                      alt=""
-                    />
-                    <div>
-                      <div className="font-bold text-gray-800 flex items-center gap-2">
-                        {member.name}
-                        {member.is_main === 1 && (
-                          <span className="bg-amber-100 text-amber-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                            Main
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {formatDate(member.created_at)}
-                      </div>
+              <tr key={member.id} className="border-t">
+                <td className="p-3">#{member.id}</td>
+
+                <td className="p-3 flex items-center gap-3">
+                  <img
+                    src={`${imgurl}/${member.image}`}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+
+                  <div>
+                    <div className="font-semibold">{member.name}</div>
+
+                    <div className="text-xs text-gray-400">
+                      {formatDate(member.created_at)}
                     </div>
                   </div>
                 </td>
-                <td className="p-4">
-                  <div className="text-sm font-bold text-blue-600">
+
+                <td className="p-3">
+                  <div className="font-medium text-blue-600">
                     {member.position}
                   </div>
-                  <div className="text-xs text-gray-500 capitalize">
-                    {member.role}
-                  </div>
+
+                  <div className="text-xs text-gray-400">{member.role}</div>
                 </td>
-                <td className="p-4">
-                  <div className="text-sm text-gray-700 font-medium">
-                    {member.number}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {member.email || "No Email"}
-                  </div>
+
+                <td className="p-3">
+                  <div>{member.number}</div>
+                  <div className="text-xs text-gray-400">{member.email}</div>
                 </td>
-                <td className="p-4">
-                  <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-xs font-bold">
+
+                <td className="p-3">
+                  <span className="bg-gray-100 px-2 py-1 rounded text-xs">
                     {member.category_name}
                   </span>
                 </td>
-                <td className="p-4">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleEdit(member)}
-                      className="text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg font-bold text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteMember(member.id)}
-                      className="text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg font-bold text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
+
+                <td className="p-3 text-center">
+                  <button
+                    onClick={() => handleEdit(member)}
+                    className="text-blue-600 mr-2"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(member.id)}
+                    className="text-red-500"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -206,19 +188,16 @@ const Team = () => {
         </table>
       </div>
 
-      {/* Modern Modal */}
+      {/* Modal */}
+
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-2xl overflow-hidden">
-            <div className="p-8 pb-4 border-b">
-              <h2 className="text-2xl font-black text-gray-800">
-                {editingMember ? "Edit Member" : "Add New Member"}
-              </h2>
-            </div>
-            <form
-              onSubmit={handleSubmit}
-              className="p-8 grid grid-cols-2 gap-4"
-            >
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white w-full max-w-sm p-6 rounded-xl shadow-xl">
+            <h2 className="text-lg font-bold mb-4">
+              {editingMember ? "Edit Member" : "Add Member"}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 type="text"
                 placeholder="Full Name"
@@ -227,35 +206,38 @@ const Team = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="bg-gray-50 border-none p-4 rounded-2xl outline-none"
+                className="w-full border px-3 py-2 rounded"
               />
+
               <input
                 type="text"
-                placeholder="Position "
+                placeholder="Position"
                 required
                 value={formData.position}
                 onChange={(e) =>
                   setFormData({ ...formData, position: e.target.value })
                 }
-                className="bg-gray-50 border-none p-4 rounded-2xl outline-none"
+                className="w-full border px-3 py-2 rounded"
               />
+
               <input
                 type="text"
-                placeholder="Phone Number"
+                placeholder="Phone"
                 value={formData.number}
                 onChange={(e) =>
                   setFormData({ ...formData, number: e.target.value })
                 }
-                className="bg-gray-50 border-none p-4 rounded-2xl outline-none"
+                className="w-full border px-3 py-2 rounded"
               />
+
               <input
                 type="email"
-                placeholder="Email Address"
+                placeholder="Email"
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="bg-gray-50 border-none p-4 rounded-2xl outline-none"
+                className="w-full border px-3 py-2 rounded"
               />
 
               <select
@@ -263,12 +245,12 @@ const Team = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, role: e.target.value })
                 }
-                className="bg-gray-50 border-none p-4 rounded-2xl outline-none"
+                className="w-full border px-3 py-2 rounded"
               >
                 <option value="">Select Role</option>
                 <option value="teacher">Teacher</option>
                 <option value="staff">Staff</option>
-                <option value="admin">Administration</option>
+                <option value="admin">Admin</option>
               </select>
 
               <select
@@ -279,42 +261,56 @@ const Team = () => {
                     is_main: parseInt(e.target.value),
                   })
                 }
-                className="bg-gray-50 border-none p-4 rounded-2xl outline-none"
+                className="w-full border px-3 py-2 rounded"
               >
                 <option value={0}>Normal Member</option>
-                <option value={1}>Main Member (Priority)</option>
+                <option value={1}>Main Member</option>
               </select>
-
+              {/* File Upload with Preview */}
               <div className="col-span-2">
-                <label className="flex items-center justify-center p-4 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50 cursor-pointer hover:border-blue-400">
-                  <span className="text-sm font-bold text-blue-600">
+                <label className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors gap-3">
+                  <span className="text-sm text-gray-500">
                     {formData.image
-                      ? `✓ ${formData.image.name}`
-                      : "Upload Member Photo"}
+                      ? formData.image.name
+                      : "Choose Member Photo"}
                   </span>
                   <input
                     type="file"
-                    onChange={(e) =>
-                      setFormData({ ...formData, image: e.target.files[0] })
-                    }
                     className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setFormData({ ...formData, image: e.target.files[0] });
+                      }
+                    }}
                   />
                 </label>
+
+                {/* Preview */}
+                {formData.image && (
+                  <div className="mt-2">
+                    <img
+                      src={URL.createObjectURL(formData.image)}
+                      alt="Preview"
+                      className="w-16 h-16 object-cover rounded-lg border"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="col-span-2 flex gap-3 pt-4">
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 bg-gray-100 py-4 rounded-2xl font-bold"
+                  className="flex-1 border py-2 rounded"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200"
+                  className="flex-1 bg-blue-600 text-white py-2 rounded"
                 >
-                  Save Member
+                  Save
                 </button>
               </div>
             </form>

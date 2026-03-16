@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import logo from "../../assets/image/logo.jpg";
 import {
   Home,
   Star,
@@ -55,7 +56,7 @@ const Sidebar = () => {
       {/* 📱 Mobile Header - Only visible on small screens */}
       <div className="lg:hidden bg-blue-700 text-white p-4 flex justify-between items-center fixed top-0 w-full z-50 shadow-md">
         <div className="flex items-center gap-2">
-          <img src={site.logo} alt="logo" className="w-8 h-8 rounded-full" />
+          <img src={logo} alt="logo" className="w-8 h-8 rounded-full" />
           <h1 className="font-bold text-sm truncate w-32">{site.name}</h1>
         </div>
         <button
@@ -66,7 +67,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* 🌑 Overlay - Closes sidebar when clicking outside */}
+    
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -85,7 +86,7 @@ const Sidebar = () => {
       >
         <div className="flex items-center gap-3 p-6 border-b border-blue-500/50">
           <img
-            src={site.logo}
+            src={logo}
             alt="Logo"
             className="w-10 h-10 rounded-full ring-2 ring-white/50"
           />
