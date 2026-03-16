@@ -3,10 +3,11 @@ import Event from "../component/pages/academic/Event";
 import QuestionBankAdmin from "../component/pages/academic/Question__Bank";
 import Dashboard from "../component/pages/Dashboard";
 import FAQPage from "../component/pages/FAQs";
-import Gallery from "../component/pages/Gallery_Content";
+import GalleryCategory from "../component/pages/gallery/Gallery_category";
+import Gallery from "../component/pages/gallery/Gallery_Content";
+
 import Review from "../component/pages/Review";
 import Team from "../component/pages/Team/Team";
-
 
 export const adminRoutes = [
   {
@@ -40,5 +41,9 @@ export const adminRoutes = [
   {
     path: "gallery",
     element: <Gallery />,
+  },
+  {
+    path: "gallerycategory",
+    element: <GalleryCategory />,
   },
 ];
