@@ -101,6 +101,28 @@ export const categoryApi = indexSlice.injectEndpoints({
       }),
       invalidatesTags: ["category"],
     }),
+    getblog_category: builder.query({
+      query: (data) => ({
+        url: "/api/category/blog",
+        method: "GET",
+        body: data,
+      }),
+      transformResponse: (response) => {
+        return Array.isArray(response)
+          ? response
+          : response.data || response.category || [];
+      },
+      providesTags: ["category"],
+    }),
+    create_blogs_category: builder.mutation({
+      query:(data)=>({
+        url:'/api/category/blog',
+        method:"POST",
+        body:data
+      }),
+      invalidatesTags:["category"]
+    }),
+    u
   }),
 });
 export const {
