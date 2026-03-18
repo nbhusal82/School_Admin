@@ -107,22 +107,63 @@ export const categoryApi = indexSlice.injectEndpoints({
         method: "GET",
         body: data,
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.category || [];
-      },
+
       providesTags: ["category"],
     }),
     create_blogs_category: builder.mutation({
-      query:(data)=>({
-        url:'/api/category/blog',
-        method:"POST",
-        body:data
+      query: (data) => ({
+        url: "/api/category/blog",
+        method: "POST",
+        body: data,
       }),
-      invalidatesTags:["category"]
+      invalidatesTags: ["category"],
     }),
-    u
+    update_blogs_category: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/category/blog/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["category"],
+    }),
+    delete_blogs_category: builder.mutation({
+      query: (id) => ({
+        url: `/api/category/blog/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["category"],
+    }),
+    get_team_category: builder.query({
+      query: (data) => ({
+        url: "/api/category/team",
+        method: "GET",
+        body: data,
+      }),
+      providesTags: ["category"],
+    }),
+    create_team_category: builder.mutation({
+      query: (data) => ({
+        url: "/api/category/team",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["category"],
+    }),
+    delete_team_category: builder.mutation({
+      query: (id) => ({
+        url: `/api/category/team/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["category"],
+    }),
+    update_team_category: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/category/team/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["category"],
+    }),
   }),
 });
 export const {
@@ -137,4 +178,12 @@ export const {
   useCreatecategory_vacancyMutation,
   useDeletecategory_vacancyMutation,
   useUpdatecategory_vacancyMutation,
+  useCreate_blogs_categoryMutation,
+  useGetblog_categoryQuery,
+  useUpdate_blogs_categoryMutation,
+  useDelete_blogs_categoryMutation,
+  useCreate_team_categoryMutation,
+  useGet_team_categoryQuery,
+  useDelete_team_categoryMutation,
+  useUpdate_team_categoryMutation,
 } = categoryApi;

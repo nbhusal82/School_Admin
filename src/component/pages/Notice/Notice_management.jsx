@@ -22,7 +22,8 @@ import { useGetcategory_noticeQuery } from "../../redux/feature/category";
 const NoticeManagement = () => {
   const navigate = useNavigate();
 
-  const { data: notices = [], isLoading } = useGetNoticeQuery();
+  const { data: notices, isLoading } = useGetNoticeQuery();
+
   const { data: categories = [] } = useGetcategory_noticeQuery();
 
   const [deleteNotice] = useDeleteNoticeMutation();
@@ -42,8 +43,10 @@ const NoticeManagement = () => {
 
   const filteredNotices =
     filter === "All"
-      ? notices
-      : notices.filter((n) => String(n.category_id) === String(filter));
+      ? notices?.data || []
+      : (notices?.data || []).filter(
+          (n) => String(n.category_id) === String(filter),
+        );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

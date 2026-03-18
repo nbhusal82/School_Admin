@@ -8,11 +8,6 @@ export const contentApi = indexSlice.injectEndpoints({
         method: "GET",
       }),
 
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.event || [];
-      },
       providesTags: ["content"],
     }),
 
@@ -46,11 +41,7 @@ export const contentApi = indexSlice.injectEndpoints({
         url: "/api/content/notice",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.event || [];
-      },
+
       providesTags: ["content"],
     }),
     createNotice: builder.mutation({
@@ -103,6 +94,39 @@ export const contentApi = indexSlice.injectEndpoints({
       }),
       invalidatesTags: ["content"],
     }),
+    getblogs: builder.query({
+      query: (data) => ({
+        url: "/api/content/blog",
+        method: "GET",
+        body: data,
+      }),
+
+      invalidatesTags: ["content"],
+    }),
+    create_blogs: builder.mutation({
+      query: (data) => ({
+        url: "/api/content/blog",
+        method: "POST",
+        body: data,
+      }),
+
+      invalidatesTags: ["content"],
+    }),
+    update_blogs: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/content/blog/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["content"],
+    }),
+    delete_blogs: builder.mutation({
+      query: (id) => ({
+        url: `/api/content/blog/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["content"],
+    }),
   }),
 });
 export const {
@@ -117,4 +141,8 @@ export const {
   useGetvacancyQuery,
   useUpdatevacancyMutation,
   useDeletevacancyMutation,
+  useCreate_blogsMutation,
+  useDelete_blogsMutation,
+  useUpdate_blogsMutation,
+  useGetblogsQuery,
 } = contentApi;

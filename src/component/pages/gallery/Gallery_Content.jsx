@@ -50,9 +50,9 @@ const Gallery = () => {
   // Logic: Filter gareko gallery matra nikalne
   const filteredGallery =
     selectedCategory === "All"
-      ? gallery
-      : gallery.filter(
-          (item) => String(item.category_id) === String(selectedCategory),
+      ? gallery?.data || []
+      : (gallery?.data || []).filter(
+          (n) => String(n.category_id) === String(filter),
         );
 
   const openModal = (item = null) => {
