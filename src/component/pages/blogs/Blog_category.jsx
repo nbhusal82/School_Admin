@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Plus, Trash2, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Pencil, X, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 import {
   useCreate_blogs_categoryMutation,
   useGetblog_categoryQuery,
@@ -11,180 +10,101 @@ import {
 
 const BlogCategory = () => {
   const navigate = useNavigate();
-
-  const { data: res } = useGetblog_categoryQuery();
+  const { data: res, isLoading } = useGetblog_categoryQuery();
   const categories = res?.data || [];
 
-  const [createCategory] = useCreate_blogs_categoryMutation();
-  const [updateCategory] = useUpdate_blogs_categoryMutation();
+  const [createCategory, { isLoading: isCreating }] = useCreate_blogs_categoryMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdate_blogs_categoryMutation();
   const [deleteCategory] = useDelete_blogs_categoryMutation();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [name, setName] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
+  const [name, setName] = useState("");
 
-  // 👉 open add
-  const openAdd = () => {
-    setEditingCat(null);
-    setName("");
-    setIsModalOpen(true);
-  };
+  const openAdd = () => { setEditingCat(null); setName(""); setModalOpen(true); };
+  const openEdit = (cat) => { setEditingCat(cat); setName(cat.category_name); setModalOpen(true); };
 
-  // 👉 open edit
-  const openEdit = (cat) => {
-    setEditingCat(cat);
-    setName(cat.category_name);
-    setIsModalOpen(true);
-  };
-
-  // 👉 submit (add/update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-
     try {
       if (editingCat) {
-        await updateCategory({
-          id: editingCat.category_id,
-          data: { category_name: name },
-        }).unwrap();
+        await updateCategory({ id: editingCat.category_id, data: { category_name: name } }).unwrap();
       } else {
         await createCategory({ category_name: name }).unwrap();
       }
-
-      setName("");
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error(err);
-    }
+      setModalOpen(false);
+    } catch (err) { console.error(err); }
   };
 
-  // 👉 delete
   const handleDelete = async (id) => {
-    if (window.confirm("Delete category?")) {
-      await deleteCategory(id).unwrap();
-    }
+    if (window.confirm("Delete category?")) await deleteCategory(id).unwrap();
   };
+
+  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className="p-8">
-      {/* HEADER */}
+    <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Blog Categories</h1>
-          <p className="text-gray-500 text-sm">
-            Add, edit and manage categories
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          {/* Back */}
-          <button
-            onClick={() => navigate("/admin/blog")}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-100"
-          >
-            ← Back
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/admin/blog")} className="p-2 hover:bg-white rounded-full border border-transparent hover:border-gray-200 transition bg-white shadow-sm">
+            <ArrowLeft size={20} className="text-gray-600" />
           </button>
-
-          {/* Add Category */}
-          <button
-            onClick={openAdd}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            <Plus size={18} />
-            Add Category
-          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">Blog Categories</h1>
+            <p className="text-xs text-gray-500 italic">Manage blog categories</p>
+          </div>
         </div>
+        <button onClick={openAdd} className="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm">
+          <Plus size={16} /> Add Category
+        </button>
       </div>
 
-      {/* TABLE */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+      <div className="max-w-2xl bg-white rounded-xl shadow-sm overflow-hidden border">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-gray-50 border-b text-gray-600 font-medium">
             <tr>
-              <th className="p-4">ID</th>
-              <th className="p-4">Category Name</th>
-              <th className="p-4 text-center">Actions</th>
+              <th className="p-3">S.N</th>
+              <th className="p-3">Category Name</th>
+              <th className="p-3 text-center">Action</th>
             </tr>
           </thead>
-
-          <tbody>
-            {categories.length > 0 ? (
-              categories.map((cat) => (
-                <tr
-                  key={cat.category_id}
-                  className="border-b hover:bg-gray-50 transition"
-                >
-                  <td className="p-4">{cat.category_id}</td>
-
-                  <td className="p-4 font-medium">{cat.category_name}</td>
-
-                  <td className="p-4 flex justify-center gap-2">
-                    {/* Edit */}
-                    <button
-                      onClick={() => openEdit(cat)}
-                      className="text-blue-500 hover:bg-blue-50 p-2 rounded-full"
-                    >
-                      <Pencil size={18} />
-                    </button>
-
-                    {/* Delete */}
-                    <button
-                      onClick={() => handleDelete(cat.category_id)}
-                      className="text-red-500 hover:bg-red-50 p-2 rounded-full"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" className="text-center p-6 text-gray-500">
-                  No categories found.
+          <tbody className="divide-y divide-gray-100">
+            {categories.map((cat, index) => (
+              <tr key={cat.category_id} className="hover:bg-gray-50 transition">
+                <td className="p-3 text-gray-400">{index + 1}</td>
+                <td className="p-3 font-medium text-gray-700">{cat.category_name}</td>
+                <td className="p-3">
+                  <div className="flex justify-center gap-2">
+                    <button onClick={() => openEdit(cat)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition"><Pencil size={16} /></button>
+                    <button onClick={() => handleDelete(cat.category_id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition"><Trash2 size={16} /></button>
+                  </div>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* MODAL (Add/Edit same page) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl w-96 shadow-lg">
-            <div className="flex justify-between mb-4">
-              <h2 className="font-semibold text-lg">
-                {editingCat ? "Edit Category" : "Add Category"}
-              </h2>
-
-              <button onClick={() => setIsModalOpen(false)}>
-                <X className="text-gray-500" />
-              </button>
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setModalOpen(false)}></div>
+          <div className="relative bg-white w-full max-w-xs rounded-xl shadow-2xl p-5">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-bold text-gray-800">{editingCat ? "Edit Category" : "Add Category"}</h2>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
-
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-3">
               <input
-                value={name}
+                autoFocus required value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter category name"
-                className="w-full border px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Category name"
+                className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               />
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  {editingCat ? "Update" : "Add"}
+              <div className="flex gap-2 pt-1">
+                <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-1.5 text-sm text-gray-500 border rounded-lg hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={isCreating || isUpdating} className="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">
+                  {isCreating || isUpdating ? "Saving..." : editingCat ? "Update" : "Save"}
                 </button>
               </div>
             </form>

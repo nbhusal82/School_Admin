@@ -64,11 +64,8 @@ export const contentApi = indexSlice.injectEndpoints({
         url: "/api/content/vacancy",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.event || [];
-      },
+   
+       
       providesTags: ["content"],
     }),
     createvacancy: builder.mutation({
@@ -101,10 +98,10 @@ export const contentApi = indexSlice.injectEndpoints({
         body: data,
       }),
 
-      invalidatesTags: ["content"],
+     providesTags: ["content"],
     }),
     create_blogs: builder.mutation({
-      query: (data) => ({
+     query: (data) => ({
         url: "/api/content/blog",
         method: "POST",
         body: data,

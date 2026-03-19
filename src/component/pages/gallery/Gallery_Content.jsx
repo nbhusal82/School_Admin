@@ -27,7 +27,8 @@ import { useGetcategory_galleryQuery } from "../../redux/feature/category";
 const Gallery = () => {
   const navigate = useNavigate();
   const { data: gallery = [], isLoading } = useGetgalleryQuery();
-  const { data: categories = [] } = useGetcategory_galleryQuery();
+  const { data: catRes } = useGetcategory_galleryQuery();
+  const categories = catRes?.data || [];
 
   const [createGallery] = useCreategalleryMutation();
   const [updateGallery] = useUpdategalleryMutation();
@@ -52,7 +53,7 @@ const Gallery = () => {
     selectedCategory === "All"
       ? gallery?.data || []
       : (gallery?.data || []).filter(
-          (n) => String(n.category_id) === String(filter),
+          (n) => String(n.category_id) === String(selectedCategory),
         );
 
   const openModal = (item = null) => {
@@ -173,7 +174,13 @@ const Gallery = () => {
                     modules={[Navigation, Pagination]}
                     navigation
                     pagination={{ clickable: true }}
-                    className="h-full"
+                    className="h-full [&_.swiper-button-next]:w-5!
+[&_.swiper-button-prev]:w-5!
+[&_.swiper-button-next]:h-5!
+[&_.swiper-button-prev]:h-5!
+
+[&_.swiper-button-next]:after:text-[8px]!
+[&_.swiper-button-prev]:after:text-[8px]!"
                   >
                     {images.map((img, i) => (
                       <SwiperSlide key={i}>

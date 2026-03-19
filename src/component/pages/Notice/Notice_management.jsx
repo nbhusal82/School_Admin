@@ -91,32 +91,26 @@ const NoticeManagement = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Notice Management</h1>
-          <p className="text-gray-500 text-sm">
-            Create and manage school notices
-          </p>
+          <h1 className="text-2xl md:text-3xl font-bold">Notice Management</h1>
+          <p className="text-gray-500 text-sm">Create and manage school notices</p>
         </div>
-
-        <div className="flex gap-3">
-          {/* CATEGORY PAGE BUTTON */}
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => navigate("/admin/notice/category")}
-            className="flex items-center gap-2 bg-white border px-4 py-2 rounded-xl font-semibold hover:bg-gray-100"
+            className="flex items-center gap-2 bg-white border px-3 py-2 rounded-xl font-semibold hover:bg-gray-100 text-sm"
           >
-            <LayoutGrid size={18} />
+            <LayoutGrid size={16} />
             View Category
           </button>
-
-          {/* ADD NOTICE */}
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl font-semibold text-sm ${
               showAddForm ? "bg-red-500 text-white" : "bg-blue-600 text-white"
             }`}
           >
-            {showAddForm ? <X size={18} /> : <Plus size={18} />}
+            {showAddForm ? <X size={16} /> : <Plus size={16} />}
             {showAddForm ? "Cancel" : "Add Notice"}
           </button>
         </div>
@@ -189,7 +183,7 @@ const NoticeManagement = () => {
       )}
 
       {/* FILTER */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <button
           onClick={() => setFilter("All")}
           className={`px-3 py-1 rounded ${
@@ -215,8 +209,8 @@ const NoticeManagement = () => {
       </div>
 
       {/* NOTICE TABLE */}
-      <div className="bg-white rounded-xl shadow border overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white rounded-xl shadow border overflow-x-auto">
+        <table className="w-full min-w-[500px]">
           <thead className="bg-gray-50">
             <tr>
               <th className="p-4 text-left">Notice</th>

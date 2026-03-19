@@ -7,11 +7,7 @@ export const categoryApi = indexSlice.injectEndpoints({
         url: "/api/category/gallery",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.category || [];
-      },
+
       providesTags: ["category"],
     }),
     createcategory_gallery: builder.mutation({

@@ -36,7 +36,7 @@ const Dashboard = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen relative">
       {/* --- LOGOUT BUTTON (TOP RIGHT FIXED) --- */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-20 right-4 lg:top-6 lg:right-6 z-50">
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg transition-all font-semibold active:scale-95"
