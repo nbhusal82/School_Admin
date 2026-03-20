@@ -114,7 +114,7 @@ const BlogManagement = () => {
       {/* BLOG LIST TABLE */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 border-b text-gray-600 font-medium">
+          <thead className="bg-gray-100 border-b text-gray-600 font-medium">
             <tr>
               <th className="p-3">Image</th>
               <th className="p-3">Title</th>

@@ -12,8 +12,8 @@ import {
   Trash2,
   X,
   FolderOpen,
-  Upload,
   Filter,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -22,6 +22,7 @@ import {
   useGetgalleryQuery,
   useUpdategalleryMutation,
 } from "../../redux/feature/content";
+
 import { useGetcategory_galleryQuery } from "../../redux/feature/category";
 
 const Gallery = () => {
@@ -30,13 +31,11 @@ const Gallery = () => {
   const { data: catRes } = useGetcategory_galleryQuery();
   const categories = catRes?.data || [];
 
-  const [createGallery] = useCreategalleryMutation();
-  const [updateGallery] = useUpdategalleryMutation();
+  const [createGallery, { isLoading: isCreating }] = useCreategalleryMutation();
+  const [updateGallery, { isLoading: isUpdating }] = useUpdategalleryMutation();
   const [deleteGallery] = useDeletegalleryMutation();
 
-  // Filter State: Default "All" hunchha
   const [selectedCategory, setSelectedCategory] = useState("All");
-
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [previews, setPreviews] = useState([]);
@@ -48,7 +47,7 @@ const Gallery = () => {
 
   const imageurl = import.meta.env.VITE_IMAGE_URL;
 
-  // Logic: Filter gareko gallery matra nikalne
+  // Filter logic
   const filteredGallery =
     selectedCategory === "All"
       ? gallery?.data || []
@@ -56,6 +55,7 @@ const Gallery = () => {
           (n) => String(n.category_id) === String(selectedCategory),
         );
 
+  // Open modal
   const openModal = (item = null) => {
     setEditing(item);
     setPreviews([]);
@@ -71,14 +71,28 @@ const Gallery = () => {
     setModal(false);
     setEditing(null);
     setPreviews([]);
+    setForm({ category_id: "", caption: "", images: [] });
   };
 
+  // File preview
   const handleFiles = (e) => {
     const files = e.target.files;
     setForm({ ...form, images: files });
     setPreviews(Array.from(files).map((f) => URL.createObjectURL(f)));
   };
 
+  // Delete handler
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure to delete this Gallery?")) {
+      try {
+        await deleteGallery(id).unwrap();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  // Add / Update handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -87,6 +101,7 @@ const Gallery = () => {
     for (let i = 0; i < form.images.length; i++) {
       formData.append("images", form.images[i]);
     }
+
     try {
       if (editing) {
         await updateGallery({ id: editing.id, data: formData }).unwrap();
@@ -103,7 +118,7 @@ const Gallery = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* HEADER SECTION */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Gallery</h1>
@@ -111,7 +126,6 @@ const Gallery = () => {
             Showing {filteredGallery.length} items
           </p>
         </div>
-
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => navigate("/admin/gallery/category")}
@@ -128,7 +142,7 @@ const Gallery = () => {
         </div>
       </div>
 
-      {/* CATEGORY FILTER TABS */}
+      {/* FILTER TABS */}
       <div className="flex flex-wrap gap-2 mb-8 items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 px-3 text-gray-400 border-r mr-2">
           <Filter size={16} />
@@ -139,7 +153,11 @@ const Gallery = () => {
 
         <button
           onClick={() => setSelectedCategory("All")}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedCategory === "All" ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+            selectedCategory === "All"
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
         >
           All Items
         </button>
@@ -148,7 +166,11 @@ const Gallery = () => {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${String(selectedCategory) === String(cat.id) ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              String(selectedCategory) === String(cat.id)
+                ? "bg-blue-600 text-white shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
           >
             {cat.category_name}
           </button>
@@ -227,7 +249,7 @@ const Gallery = () => {
         </div>
       )}
 
-      {/* MODAL (Compact) */}
+      {/* MODAL */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
           <form
@@ -302,9 +324,13 @@ const Gallery = () => {
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md"
+                disabled={isCreating || isUpdating}
+                className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md flex items-center justify-center gap-2"
               >
-                Upload
+                {(isCreating || isUpdating) && (
+                  <Loader2 size={16} className="animate-spin" />
+                )}
+                {editing ? "Update" : "Upload"}
               </button>
             </div>
           </form>

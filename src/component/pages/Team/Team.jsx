@@ -101,7 +101,9 @@ const Team = () => {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-800">Team Management</h1>
-          <p className="text-xs text-gray-500 italic">Manage your organization's hierarchy and members</p>
+          <p className="text-xs text-gray-500 italic">
+            Manage your organization's hierarchy and members
+          </p>
         </div>
 
         <div className="flex gap-2">
@@ -125,7 +127,7 @@ const Team = () => {
       {/* Table Section */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 border-b text-gray-600 font-medium">
+          <thead className="bg-gray-100 border-b text-gray-600 font-medium">
             <tr>
               <th className="p-3">ID</th>
               <th className="p-3">Member Details</th>
@@ -148,7 +150,9 @@ const Team = () => {
                     alt={member.name}
                   />
                   <div>
-                    <div className="font-semibold text-gray-700">{member.name}</div>
+                    <div className="font-semibold text-gray-700">
+                      {member.name}
+                    </div>
                     <div className="text-[10px] text-gray-400 uppercase tracking-wider">
                       Joined: {formatDate(member.created_at)}
                     </div>
@@ -156,27 +160,44 @@ const Team = () => {
                 </td>
 
                 <td className="p-3">
-                  <div className="font-medium text-blue-600 leading-tight">{member.position}</div>
-                  <div className="text-xs text-gray-500 capitalize">{member.role}</div>
+                  <div className="font-medium text-blue-600 leading-tight">
+                    {member.position}
+                  </div>
+                  <div className="text-xs text-gray-500 capitalize">
+                    {member.role}
+                  </div>
                 </td>
 
                 <td className="p-3">
-                  <div className="text-gray-700 flex items-center gap-1"><Phone size={12} className="text-gray-400"/> {member.number}</div>
-                  <div className="text-xs text-gray-400 flex items-center gap-1"><Mail size={12}/> {member.email}</div>
+                  <div className="text-gray-700 flex items-center gap-1">
+                    <Phone size={12} className="text-gray-400" />{" "}
+                    {member.number}
+                  </div>
+                  <div className="text-xs text-gray-400 flex items-center gap-1">
+                    <Mail size={12} /> {member.email}
+                  </div>
                 </td>
 
                 <td className="p-3 text-center">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${member.is_main ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${member.is_main ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"}`}
+                  >
                     {member.is_main ? "⭐ Main" : "Normal"}
                   </span>
                 </td>
 
                 <td className="p-3">
                   <div className="flex justify-center gap-2">
-                    <button onClick={() => handleEdit(member)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition">
+                    <button
+                      onClick={() => handleEdit(member)}
+                      className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition"
+                    >
                       <Pencil size={16} />
                     </button>
-                    <button onClick={() => handleDelete(member.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition">
+                    <button
+                      onClick={() => handleDelete(member.id)}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -191,18 +212,21 @@ const Team = () => {
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Overlay background */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
           ></div>
-          
+
           {/* Modal Container */}
           <div className="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-5 animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold text-gray-800 text-lg">
                 {editingMember ? "Edit Team Member" : "New Member Registration"}
               </h2>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -210,11 +234,16 @@ const Team = () => {
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Full Name</label>
+                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                  Full Name
+                </label>
                 <input
-                  type="text" required
+                  type="text"
+                  required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="Enter full name"
                   className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
@@ -223,20 +252,30 @@ const Team = () => {
               {/* Position & Role Row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Position</label>
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                    Position
+                  </label>
                   <input
-                    type="text" required
+                    type="text"
+                    required
                     value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, position: e.target.value })
+                    }
                     placeholder="e.g. Principal"
                     className="w-full border border-gray-200 px-3 py-1.5 rounded-lg text-sm outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Role</label>
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                    Role
+                  </label>
                   <select
-                    value={formData.role} required
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    value={formData.role}
+                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
                     className="w-full border border-gray-200 px-2 py-1.5 rounded-lg text-sm outline-none bg-white"
                   >
                     <option value="">Select Role</option>
@@ -250,21 +289,29 @@ const Team = () => {
               {/* Contact Row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Phone Number</label>
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                    Phone Number
+                  </label>
                   <input
                     type="text"
                     value={formData.number}
-                    onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, number: e.target.value })
+                    }
                     placeholder="98XXXXXXXX"
                     className="w-full border border-gray-200 px-3 py-1.5 rounded-lg text-sm outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Email</label>
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     placeholder="mail@example.com"
                     className="w-full border border-gray-200 px-3 py-1.5 rounded-lg text-sm outline-none"
                   />
@@ -273,10 +320,17 @@ const Team = () => {
 
               {/* Member Type */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Member Status</label>
+                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                  Member Status
+                </label>
                 <select
                   value={formData.is_main}
-                  onChange={(e) => setFormData({ ...formData, is_main: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      is_main: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full border border-gray-200 px-2 py-1.5 rounded-lg text-sm outline-none bg-white"
                 >
                   <option value={0}>Normal Member</option>
@@ -286,15 +340,24 @@ const Team = () => {
 
               {/* Photo Upload */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Member Photo</label>
+                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                  Member Photo
+                </label>
                 <div className="flex items-center gap-3 border-2 border-dashed p-2 rounded-lg border-gray-200">
                   <input
                     type="file"
                     className="text-xs text-gray-500 file:mr-3 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700"
-                    onChange={(e) => e.target.files?.[0] && setFormData({ ...formData, image: e.target.files[0] })}
+                    onChange={(e) =>
+                      e.target.files?.[0] &&
+                      setFormData({ ...formData, image: e.target.files[0] })
+                    }
                   />
                   {formData.image && (
-                    <img src={URL.createObjectURL(formData.image)} className="w-8 h-8 rounded object-cover border" alt="preview" />
+                    <img
+                      src={URL.createObjectURL(formData.image)}
+                      className="w-8 h-8 rounded object-cover border"
+                      alt="preview"
+                    />
                   )}
                 </div>
               </div>

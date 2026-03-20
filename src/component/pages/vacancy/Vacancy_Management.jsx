@@ -1,36 +1,38 @@
 import React, { useState } from "react";
-import {
-  Plus,
-  Trash2,
-  X,
-  Loader2,
-  Briefcase,
-  Calendar,
-  FileText,
-} from "lucide-react";
+import { Plus, Trash2, X, Loader2, Pencil } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 import {
   useCreatevacancyMutation,
   useDeletevacancyMutation,
   useGetvacancyQuery,
+  useUpdatevacancyMutation,
 } from "../../redux/feature/content";
+
 import { useGet_vacancy_categoryQuery } from "../../redux/feature/category";
 
 const VacancyManagement = () => {
-  const { data: vacancyRes, isLoading } = useGetvacancyQuery();
+  const navigate = useNavigate();
+
+  const { data: vacancyRes, isLoading, refetch } = useGetvacancyQuery();
   const { data: catRes } = useGet_vacancy_categoryQuery();
 
   const vacancyItems = vacancyRes?.data || [];
   const categories = catRes?.data || catRes || [];
 
   const [createVacancy, { isLoading: isCreating }] = useCreatevacancyMutation();
+  const [updateVacancy, { isLoading: isUpdating }] = useUpdatevacancyMutation();
   const [deleteVacancy] = useDeletevacancyMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   const [form, setForm] = useState({
     title: "",
     category_id: "",
-    description: "", // Added because API requires it
+    description: "",
     deadline: "",
+    status: "open",
   });
 
   const handleInput = (e) => {
@@ -38,65 +40,177 @@ const VacancyManagement = () => {
     setForm({ ...form, [name]: value });
   };
 
+  // ✏️ Edit handler
+  const handleEdit = (item) => {
+    setEditId(item.id);
+    setForm({
+      title: item.title,
+      category_id: item.category_id,
+      description: item.description,
+      deadline: item.application_deadline,
+      status: item.status || "open",
+    });
+    setIsModalOpen(true);
+  };
+
+  // 🔄 Add or Update handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // API le khojey ko format ma data pathaune
     const payload = {
       title: form.title,
       category_id: form.category_id,
-      description: form.description, // API needs this
-      deadline: form.deadline,
-      posted_date: new Date().toISOString().split("T")[0], // API needs posted_date
+      description: form.description,
+      application_deadline: form.deadline,
+      status: form.status,
+      posted_date: new Date().toISOString().split("T")[0],
     };
 
     try {
-      await createVacancy(payload).unwrap();
+      if (editId) {
+        // FIXED: Tapaiko mutation le ({ id, data }) format khojchha
+        await updateVacancy({ id: editId, data: payload }).unwrap();
+      } else {
+        await createVacancy(payload).unwrap();
+      }
+      refetch();
       setIsModalOpen(false);
-      setForm({ title: "", category_id: "", description: "", deadline: "" });
+      setEditId(null);
+      setForm({
+        title: "",
+        category_id: "",
+        description: "",
+        deadline: "",
+        status: "open",
+      });
     } catch (err) {
-      console.error("Error details:", err);
+      console.error(err);
     }
   };
 
-  if (isLoading)
-    return (
-      <div className="p-20 text-center text-gray-400 animate-pulse">
-        Loading...
-      </div>
-    );
+  // ⚡ FIXED: Quick Status change from Table
+  const handleStatusChange = async (item, newStatus) => {
+    try {
+      // FIXED: Mutation requirement ({ id, data }) anusar wrap gareko
+      await updateVacancy({
+        id: item.id,
+        data: {
+          title: item.title,
+          category_id: item.category_id,
+          description: item.description,
+          application_deadline: item.application_deadline,
+          status: newStatus, // New value from select
+        },
+      }).unwrap();
+      refetch();
+    } catch (err) {
+      console.error("Status update error:", err);
+    }
+  };
+
+  // 🗑 Delete handler
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure to delete this vacancy?")) {
+      try {
+        await deleteVacancy(id).unwrap();
+        refetch();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  if (isLoading) return <div className="p-20 text-center">Loading...</div>;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      {/* 🔝 Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-bold text-gray-800">Vacancy Management</h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-700 transition shadow-lg shadow-blue-100"
-        >
-          <Plus size={18} /> Add Vacancy
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate("/admin/vacancy/category")}
+            className="border px-4 py-2 rounded-lg hover:bg-gray-100 text-sm font-semibold"
+          >
+            View Category
+          </button>
+
+          <button
+            onClick={() => {
+              setEditId(null);
+              setForm({
+                title: "",
+                category_id: "",
+                description: "",
+                deadline: "",
+                status: "open",
+              });
+              setIsModalOpen(true);
+            }}
+            className="bg-[#211636] text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold hover:opacity-90"
+          >
+            <Plus size={18} /> Add Vacancy
+          </button>
+        </div>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b text-[10px] uppercase font-black text-gray-400">
+      {/* 📋 Table */}
+      <div className="bg-white rounded-xl shadow border overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-100 text-sm">
             <tr>
-              <th className="px-6 py-4">Title</th>
-              <th className="px-6 py-4 text-right">Action</th>
+              <th className="p-3 text-left">Title</th>
+              <th className="p-3 text-left">Category</th>
+              <th className="p-3 text-center">Deadline</th>
+              <th className="p-3 text-center">Posted</th>
+              <th className="p-3 text-center">Status</th>
+              <th className="p-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+
+          <tbody>
             {vacancyItems.map((item) => (
-              <tr key={item.id} className="hover:bg-blue-50/20 transition">
-                <td className="px-6 py-4 font-bold text-gray-700 text-sm">
-                  {item.title}
+              <tr key={item.id} className="border-t hover:bg-gray-50">
+                <td className="p-3 font-medium">{item.title}</td>
+
+                <td className="p-3">
+                  {categories.find(
+                    (c) => String(c.category_id) === String(item.category_id),
+                  )?.category_name || "N/A"}
                 </td>
-                <td className="px-6 py-4 text-right">
+
+                <td className="p-3 text-center">{item.application_deadline}</td>
+                <td className="p-3 text-center">{item.posted_date}</td>
+
+                <td className="p-3 text-center">
+                  <select
+                    value={item.status}
+                    onChange={(e) => handleStatusChange(item, e.target.value)}
+                    className={`border rounded px-2 py-1 text-sm font-semibold ${
+                      item.status === "open"
+                        ? "text-green-600"
+                        : item.status === "closed"
+                          ? "text-red-600"
+                          : "text-yellow-600"
+                    }`}
+                  >
+                    <option value="open">Open</option>
+                    <option value="closed">Closed</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </td>
+
+                <td className="p-3 text-right flex justify-end gap-2">
                   <button
-                    onClick={() => deleteVacancy(item.id)}
-                    className="text-red-400 hover:text-red-600 p-2"
+                    onClick={() => handleEdit(item)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <Pencil size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-500 hover:text-red-700"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -107,126 +221,93 @@ const VacancyManagement = () => {
         </table>
       </div>
 
-      {/* Modal Section */}
+      {/* ➕ Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-black text-gray-800 text-lg uppercase tracking-tight">
-                Post New Vacancy
-              </h2>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl relative">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute right-3 top-3"
+            >
+              <X size={20} />
+            </button>
+
+            <h2 className="text-lg font-semibold mb-4">
+              {editId ? "Update Vacancy" : "Add Vacancy"}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleInput}
+                placeholder="Title"
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleInput}
+                placeholder="Description"
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  name="category_id"
+                  value={form.category_id}
+                  onChange={handleInput}
+                  className="border p-2 rounded-lg"
+                  required
+                >
+                  <option value="">Category</option>
+                  {categories.map((c) => (
+                    <option key={c.category_id} value={c.category_id}>
+                      {c.category_name}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  name="status"
+                  value={form.status}
+                  onChange={handleInput}
+                  className="border p-2 rounded-lg"
+                >
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              <input
+                type="date"
+                name="deadline"
+                value={form.deadline}
+                onChange={handleInput}
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                type="submit"
+                disabled={isCreating || isUpdating}
+                className="w-full bg-[#211636] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:opacity-90"
               >
-                <X size={20} />
+                {isCreating || isUpdating ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Saving...
+                  </>
+                ) : editId ? (
+                  "Update Vacancy"
+                ) : (
+                  "Save Vacancy"
+                )}
               </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Title Input */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-1 block mb-1">
-                  Vacancy Title
-                </label>
-                <div className="relative">
-                  <Briefcase
-                    size={14}
-                    className="absolute left-3 top-3.5 text-gray-300"
-                  />
-                  <input
-                    name="title"
-                    required
-                    value={form.title}
-                    onChange={handleInput}
-                    className="w-full border border-gray-100 bg-gray-50/50 pl-10 pr-4 py-3 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none font-semibold transition-all"
-                    placeholder="e.g. Senior Teacher"
-                  />
-                </div>
-              </div>
-
-              {/* Description Input (Required by API) */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-1 block mb-1">
-                  Job Description
-                </label>
-                <div className="relative">
-                  <FileText
-                    size={14}
-                    className="absolute left-3 top-3.5 text-gray-300"
-                  />
-                  <textarea
-                    name="description"
-                    required
-                    value={form.description}
-                    onChange={handleInput}
-                    className="w-full border border-gray-100 bg-gray-50/50 pl-10 pr-4 py-3 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none font-semibold transition-all h-24 resize-none"
-                    placeholder="Write job details here..."
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Category Select */}
-                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1 block mb-1">
-                    Category
-                  </label>
-                  <select
-                    name="category_id"
-                    required
-                    value={form.category_id}
-                    onChange={handleInput}
-                    className="w-full border border-gray-100 bg-gray-50/50 px-4 py-3 rounded-2xl text-sm font-semibold outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="">Select</option>
-                    {categories.map((c) => (
-                      <option key={c.category_id} value={c.category_id}>
-                        {c.category_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Deadline Input */}
-                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1 block mb-1">
-                    Deadline
-                  </label>
-                  <input
-                    type="date"
-                    name="deadline"
-                    required
-                    value={form.deadline}
-                    onChange={handleInput}
-                    className="w-full border border-gray-100 bg-gray-50/50 px-4 py-3 rounded-2xl text-sm font-semibold outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3 text-xs font-black text-gray-400 uppercase tracking-widest"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className="flex-2 bg-blue-600 text-white py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-100 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70 transition-all"
-                >
-                  {isCreating ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" /> Saving...
-                    </>
-                  ) : (
-                    "Publish Vacancy"
-                  )}
-                </button>
-              </div>
             </form>
           </div>
         </div>

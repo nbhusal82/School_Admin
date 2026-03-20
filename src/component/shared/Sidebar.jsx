@@ -54,7 +54,7 @@ const Sidebar = () => {
   return (
     <>
       {/* 📱 Mobile Header - Only visible on small screens */}
-      <div className="lg:hidden bg-blue-700 text-white p-4 flex justify-between items-center fixed top-0 w-full z-50 shadow-md">
+      <div className="lg:hidden bg-blue-950 text-white p-4 flex justify-between items-center fixed top-0 w-full z-50 shadow-md">
         <div className="flex items-center gap-2">
           <img src={logo} alt="logo" className="w-8 h-8 rounded-full" />
           <h1 className="font-bold text-sm truncate w-32">{site.name}</h1>
@@ -67,7 +67,6 @@ const Sidebar = () => {
         </button>
       </div>
 
-    
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -78,7 +77,7 @@ const Sidebar = () => {
       {/* 🖥️ Sidebar Drawer */}
       <aside
         className={`
-        fixed left-0 top-0 h-screen w-64 bg-linear-to-b from-blue-600 to-blue-800 text-white shadow-xl z-50
+        fixed left-0 top-0 h-screen w-64 bg-linear-to-b bg-[#211636] text-white shadow-xl z-50
         transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
         lg:translate-x-0 

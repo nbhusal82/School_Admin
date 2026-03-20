@@ -94,7 +94,9 @@ const NoticeManagement = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Notice Management</h1>
-          <p className="text-gray-500 text-sm">Create and manage school notices</p>
+          <p className="text-gray-500 text-sm">
+            Create and manage school notices
+          </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button
@@ -210,8 +212,8 @@ const NoticeManagement = () => {
 
       {/* NOTICE TABLE */}
       <div className="bg-white rounded-xl shadow border overflow-x-auto">
-        <table className="w-full min-w-[500px]">
-          <thead className="bg-gray-50">
+        <table className="w-full min-w-125">
+          <thead className="bg-gray-100">
             <tr>
               <th className="p-4 text-left">Notice</th>
               <th>Date</th>

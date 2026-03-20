@@ -4,7 +4,7 @@ export const contentApi = indexSlice.injectEndpoints({
   endpoints: (builder) => ({
     getgallery: builder.query({
       query: () => ({
-        url: "/api/content/gallery  ",
+        url: "/api/content/gallery",
         method: "GET",
       }),
 
@@ -13,7 +13,7 @@ export const contentApi = indexSlice.injectEndpoints({
 
     creategallery: builder.mutation({
       query: (data) => ({
-        url: "/api/content/gallery  ",
+        url: "/api/content/gallery",
         method: "POST",
         body: data,
       }),
@@ -64,9 +64,7 @@ export const contentApi = indexSlice.injectEndpoints({
         url: "/api/content/vacancy",
         method: "GET",
       }),
-   
-       
-      providesTags: ["content"],
+     providesTags: ["content"],
     }),
     createvacancy: builder.mutation({
       query: (data) => ({

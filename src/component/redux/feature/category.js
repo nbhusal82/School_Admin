@@ -143,6 +143,27 @@ export const categoryApi = indexSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      // Optimistic update
+      onQueryStarted: async (data, { dispatch, queryFulfilled }) => {
+        const patchResult = dispatch(
+          categoryApi.util.updateQueryData('get_team_category', undefined, (draft) => {
+            draft.push({ ...data, category_id: Date.now(), temp: true });
+          })
+        );
+        try {
+          const { data: result } = await queryFulfilled;
+          dispatch(
+            categoryApi.util.updateQueryData('get_team_category', undefined, (draft) => {
+              const index = draft.findIndex(item => item.temp);
+              if (index !== -1) {
+                draft[index] = result.data || result;
+              }
+            })
+          );
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["category"],
     }),
     delete_team_category: builder.mutation({
@@ -158,6 +179,22 @@ export const categoryApi = indexSlice.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      // Optimistic update for faster UI
+      onQueryStarted: async ({ id, data }, { dispatch, queryFulfilled }) => {
+        const patchResult = dispatch(
+          categoryApi.util.updateQueryData('get_team_category', undefined, (draft) => {
+            const index = draft.findIndex(item => item.category_id === id);
+            if (index !== -1) {
+              draft[index] = { ...draft[index], ...data };
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["category"],
     }),
   }),
