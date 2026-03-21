@@ -18,6 +18,17 @@ export const authApi = indexSlice.injectEndpoints({
       }),
       providesTags: ["auth"],
     }),
+    getDashboardStats: builder.query({
+      query: () => ({
+        url: "/api/auth/dashboard-stats",
+        method: "GET",
+      }),
+      providesTags: ["auth"],
+    }),
   }),
 });
-export const { useLoginMutation, useLogoutMutation } = authApi;
+export const {
+  useLoginMutation,
+  useLogoutMutation,
+  useGetDashboardStatsQuery,
+} = authApi;

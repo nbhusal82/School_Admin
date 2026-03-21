@@ -54,7 +54,7 @@ const Sidebar = () => {
   return (
     <>
       {/* 📱 Mobile Header - Only visible on small screens */}
-      <div className="lg:hidden bg-blue-950 text-white p-4 flex justify-between items-center fixed top-0 w-full z-50 shadow-md">
+      <div className="lg:hidden bg-blue-950 text-white p-3 flex justify-between items-center fixed top-0 w-full z-50 shadow-md">
         <div className="flex items-center gap-2">
           <img src={logo} alt="logo" className="w-8 h-8 rounded-full" />
           <h1 className="font-bold text-sm truncate w-32">{site.name}</h1>
@@ -63,7 +63,7 @@ const Sidebar = () => {
           onClick={() => setIsOpen(!isOpen)}
           className="p-1 rounded-md bg-blue-800"
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
@@ -77,13 +77,13 @@ const Sidebar = () => {
       {/* 🖥️ Sidebar Drawer */}
       <aside
         className={`
-        fixed left-0 top-0 h-screen w-64 bg-linear-to-b bg-[#211636] text-white shadow-xl z-50
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        lg:translate-x-0 
-      `}
+  fixed left-0 top-0 h-screen w-52 bg-linear-to-b bg-[#211636] text-white shadow-xl z-50
+  transition-transform duration-300 ease-in-out
+  ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+  lg:translate-x-0 
+`}
       >
-        <div className="flex items-center gap-3 p-6 border-b border-blue-500/50">
+        <div className="flex items-center gap-3 p-4 border-b border-blue-500/50">
           <img
             src={logo}
             alt="Logo"

@@ -96,36 +96,35 @@ const Team = () => {
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen relative">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen relative">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Team Management</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Team Management</h1>
           <p className="text-xs text-gray-500 italic">
             Manage your organization's hierarchy and members
           </p>
         </div>
 
-        <div className="flex gap-2">
-          {/* Category Management Button */}
+        <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => navigate("/admin/team/category")}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-white transition bg-gray-50 text-gray-700"
+            className="flex items-center justify-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-white transition bg-gray-50 text-gray-700"
           >
-            <Users size={16} /> Team Categories
+            <Users size={16} /> <span className="hidden sm:inline">Team Categories</span><span className="sm:hidden">Categories</span>
           </button>
 
           <button
             onClick={openAddModal}
-            className="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm"
+            className="flex items-center justify-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm"
           >
             <Plus size={16} /> Add Member
           </button>
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
+      {/* Desktop Table - Hidden on mobile */}
+      <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden border">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-100 border-b text-gray-600 font-medium">
             <tr>
@@ -208,33 +207,88 @@ const Team = () => {
         </table>
       </div>
 
-      {/* COMPACT MODAL - Matches Blog Style */}
+      {/* Mobile Cards - Visible only on mobile */}
+      <div className="lg:hidden space-y-3">
+        {teamMembers.map((member) => (
+          <div key={member.id} className="bg-white rounded-lg shadow-sm border p-4">
+            <div className="flex items-start gap-3 mb-3">
+              <img
+                src={`${imgurl}/${member.image}`}
+                className="w-12 h-12 rounded-full object-cover border shrink-0"
+                alt={member.name}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-800 truncate">{member.name}</h3>
+                    <p className="text-sm text-blue-600 font-medium">{member.position}</p>
+                    <p className="text-xs text-gray-500 capitalize">{member.role}</p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-bold uppercase shrink-0 ${member.is_main ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    {member.is_main ? "⭐" : "Normal"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2 mb-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Phone size={14} className="text-gray-400 shrink-0" />
+                <span className="truncate">{member.number}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Mail size={14} className="text-gray-400 shrink-0" />
+                <span className="truncate">{member.email}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+              <span className="text-xs text-gray-400">ID: #{member.id} • Joined: {formatDate(member.created_at)}</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(member)}
+                  className="p-2 text-blue-500 hover:bg-blue-50 rounded-md transition"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(member.id)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-md transition"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* RESPONSIVE MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Overlay background */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
           ></div>
 
-          {/* Modal Container */}
-          <div className="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-5 animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[90vh]">
+          <div className="relative bg-white w-full max-w-sm sm:max-w-md rounded-xl shadow-2xl p-4 sm:p-5 animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[95vh] sm:max-h-[90vh]">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-gray-800 text-lg">
-                {editingMember ? "Edit Team Member" : "New Member Registration"}
+              <h2 className="font-bold text-gray-800 text-base sm:text-lg pr-2">
+                {editingMember ? "Edit Member" : "New Member"}
               </h2>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
+                className="text-gray-400 hover:text-gray-600 transition p-1"
               >
                 <X size={20} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Name */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                <label className="text-xs font-medium text-gray-600 mb-1 block">
                   Full Name
                 </label>
                 <input
@@ -245,14 +299,13 @@ const Team = () => {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="Enter full name"
-                  className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
               </div>
 
-              {/* Position & Role Row */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
                     Position
                   </label>
                   <input
@@ -262,48 +315,44 @@ const Team = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, position: e.target.value })
                     }
-                    placeholder="e.g. Principal"
-                    className="w-full border border-gray-200 px-3 py-1.5 rounded-lg text-sm outline-none"
+                    placeholder="Position"
+                    className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
                     Role
-                  </label>
-                  <select
-                    value={formData.role}
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value })
-                    }
-                    className="w-full border border-gray-200 px-2 py-1.5 rounded-lg text-sm outline-none bg-white"
-                  >
-                    <option value="">Select Role</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Contact Row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                    Phone Number
                   </label>
                   <input
                     type="text"
+                    required
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                    placeholder="Role"
+                    className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
                     value={formData.number}
                     onChange={(e) =>
                       setFormData({ ...formData, number: e.target.value })
                     }
-                    placeholder="98XXXXXXXX"
-                    className="w-full border border-gray-200 px-3 py-1.5 rounded-lg text-sm outline-none"
+                    placeholder="Phone number"
+                    className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
                     Email
                   </label>
                   <input
@@ -312,69 +361,72 @@ const Team = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    placeholder="mail@example.com"
-                    className="w-full border border-gray-200 px-3 py-1.5 rounded-lg text-sm outline-none"
+                    placeholder="Email address"
+                    className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 </div>
               </div>
 
-              {/* Member Type */}
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Member Status
-                </label>
-                <select
-                  value={formData.is_main}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      is_main: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full border border-gray-200 px-2 py-1.5 rounded-lg text-sm outline-none bg-white"
-                >
-                  <option value={0}>Normal Member</option>
-                  <option value={1}>Main Member (Featured)</option>
-                </select>
-              </div>
-
-              {/* Photo Upload */}
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Member Photo
-                </label>
-                <div className="flex items-center gap-3 border-2 border-dashed p-2 rounded-lg border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
+                    Category ID
+                  </label>
                   <input
-                    type="file"
-                    className="text-xs text-gray-500 file:mr-3 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700"
+                    type="number"
+                    required
+                    value={formData.category_id}
                     onChange={(e) =>
-                      e.target.files?.[0] &&
-                      setFormData({ ...formData, image: e.target.files[0] })
+                      setFormData({ ...formData, category_id: e.target.value })
                     }
+                    placeholder="Category ID"
+                    className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
-                  {formData.image && (
-                    <img
-                      src={URL.createObjectURL(formData.image)}
-                      className="w-8 h-8 rounded object-cover border"
-                      alt="preview"
-                    />
-                  )}
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
+                    Type
+                  </label>
+                  <select
+                    value={formData.is_main}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_main: parseInt(e.target.value) })
+                    }
+                    className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  >
+                    <option value={0}>Normal</option>
+                    <option value={1}>Main Member</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">
+                  Profile Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setFormData({ ...formData, image: e.target.files[0] })
+                  }
+                  className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 py-1.5 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
                 >
-                  {editingMember ? "Update Member" : "Save Member"}
+                  {editingMember ? "Update" : "Create"}
                 </button>
               </div>
             </form>
