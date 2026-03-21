@@ -122,17 +122,21 @@ const VacancyManagement = () => {
   if (isLoading) return <div className="p-20 text-center">Loading...</div>;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       {/* 🔝 Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-bold text-gray-800">Vacancy Management</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+        <div>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Vacancy Management</h1>
+          <p className="text-xs text-gray-500">Manage job vacancies</p>
+        </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => navigate("/admin/vacancy/category")}
-            className="border px-4 py-2 rounded-lg hover:bg-gray-100 text-sm font-semibold"
+            className="border px-3 py-2 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold min-h-[44px] flex items-center gap-2"
           >
-            View Category
+            <span className="hidden sm:inline">View Category</span>
+            <span className="sm:hidden">Category</span>
           </button>
 
           <button
@@ -147,15 +151,17 @@ const VacancyManagement = () => {
               });
               setIsModalOpen(true);
             }}
-            className="bg-[#211636] text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold hover:opacity-90"
+            className="bg-[#211636] text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-semibold hover:opacity-90 min-h-[44px]"
           >
-            <Plus size={18} /> Add Vacancy
+            <Plus size={18} /> 
+            <span className="hidden sm:inline">Add Vacancy</span>
+            <span className="sm:hidden">Add</span>
           </button>
         </div>
       </div>
 
-      {/* 📋 Table */}
-      <div className="bg-white rounded-xl shadow border overflow-hidden">
+      {/* 📋 DESKTOP TABLE - Hidden on mobile */}
+      <div className="hidden lg:block bg-white rounded-xl shadow border overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-100 text-sm">
             <tr>
@@ -203,14 +209,14 @@ const VacancyManagement = () => {
                 <td className="p-3 text-right flex justify-end gap-2">
                   <button
                     onClick={() => handleEdit(item)}
-                    className="text-blue-500 hover:text-blue-700"
+                    className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg"
                   >
                     <Pencil size={16} />
                   </button>
 
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -221,93 +227,179 @@ const VacancyManagement = () => {
         </table>
       </div>
 
-      {/* ➕ Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl relative">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute right-3 top-3"
-            >
-              <X size={20} />
-            </button>
-
-            <h2 className="text-lg font-semibold mb-4">
-              {editId ? "Update Vacancy" : "Add Vacancy"}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input
-                name="title"
-                value={form.title}
-                onChange={handleInput}
-                placeholder="Title"
-                className="w-full border p-2 rounded-lg"
-                required
-              />
-
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleInput}
-                placeholder="Description"
-                className="w-full border p-2 rounded-lg"
-                required
-              />
-
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  name="category_id"
-                  value={form.category_id}
-                  onChange={handleInput}
-                  className="border p-2 rounded-lg"
-                  required
+      {/* 📱 MOBILE CARDS - Visible only on mobile/tablet */}
+      <div className="lg:hidden space-y-3">
+        {vacancyItems.map((item) => (
+          <div key={item.id} className="bg-white rounded-xl shadow border p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-1">{item.title}</h3>
+                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                  {categories.find(
+                    (c) => String(c.category_id) === String(item.category_id),
+                  )?.category_name || "N/A"}
+                </span>
+              </div>
+              
+              <div className="flex gap-1">
+                <button
+                  onClick={() => handleEdit(item)}
+                  className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
-                  <option value="">Category</option>
-                  {categories.map((c) => (
-                    <option key={c.category_id} value={c.category_id}>
-                      {c.category_name}
-                    </option>
-                  ))}
-                </select>
-
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Deadline:</span>
+                <span className="font-medium">{item.application_deadline}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Posted:</span>
+                <span className="font-medium">{item.posted_date}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Status:</span>
                 <select
-                  name="status"
-                  value={form.status}
-                  onChange={handleInput}
-                  className="border p-2 rounded-lg"
+                  value={item.status}
+                  onChange={(e) => handleStatusChange(item, e.target.value)}
+                  className={`border rounded px-2 py-1 text-sm font-semibold min-h-[44px] ${
+                    item.status === "open"
+                      ? "text-green-600"
+                      : item.status === "closed"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                  }`}
                 >
                   <option value="open">Open</option>
                   <option value="closed">Closed</option>
                   <option value="pending">Pending</option>
                 </select>
               </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-              <input
-                type="date"
-                name="deadline"
-                value={form.deadline}
-                onChange={handleInput}
-                className="w-full border p-2 rounded-lg"
-                required
-              />
+      {/* ➕ Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-sm sm:max-w-md rounded-2xl p-4 sm:p-5 shadow-xl relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute right-3 top-3 p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <X size={20} />
+            </button>
 
-              <button
-                type="submit"
-                disabled={isCreating || isUpdating}
-                className="w-full bg-[#211636] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:opacity-90"
-              >
-                {isCreating || isUpdating ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Saving...
-                  </>
-                ) : editId ? (
-                  "Update Vacancy"
-                ) : (
-                  "Save Vacancy"
-                )}
-              </button>
+            <h2 className="text-base sm:text-lg font-semibold mb-4 pr-8">
+              {editId ? "Update Vacancy" : "Add Vacancy"}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="text-xs font-bold block mb-1">Title</label>
+                <input
+                  name="title"
+                  value={form.title}
+                  onChange={handleInput}
+                  placeholder="Vacancy title"
+                  className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold block mb-1">Description</label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleInput}
+                  placeholder="Job description"
+                  className="w-full border p-3 rounded-lg text-sm min-h-[80px] resize-none"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold block mb-1">Category</label>
+                  <select
+                    name="category_id"
+                    value={form.category_id}
+                    onChange={handleInput}
+                    className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((c) => (
+                      <option key={c.category_id} value={c.category_id}>
+                        {c.category_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold block mb-1">Status</label>
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleInput}
+                    className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                  >
+                    <option value="open">Open</option>
+                    <option value="closed">Closed</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold block mb-1">Application Deadline</label>
+                <input
+                  type="date"
+                  name="deadline"
+                  value={form.deadline}
+                  onChange={handleInput}
+                  className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-2 pt-3">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)} 
+                  className="flex-1 py-3 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50 min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreating || isUpdating}
+                  className="flex-1 bg-[#211636] text-white py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 text-sm font-semibold min-h-[44px]"
+                >
+                  {isCreating || isUpdating ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Saving...
+                    </>
+                  ) : editId ? (
+                    "Update Vacancy"
+                  ) : (
+                    "Save Vacancy"
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>
