@@ -4,7 +4,7 @@ export const academicApi = indexSlice.injectEndpoints({
   endpoints: (builder) => ({
     getEvent: builder.query({
       query: () => ({
-        url: "/api/academic/event",
+        url:"/api/academic/event",
         method: "GET",
       }),
 
@@ -18,7 +18,7 @@ export const academicApi = indexSlice.injectEndpoints({
 
     createEvent: builder.mutation({
       query: (data) => ({
-        url: "/api/academic/event",
+        url:"/api/academic/event",
         method: "POST",
         body: data,
       }),
@@ -27,7 +27,7 @@ export const academicApi = indexSlice.injectEndpoints({
 
     updateEvent: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/api/academic/event/${id}`,
+        url:`/api/academic/event/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -36,28 +36,23 @@ export const academicApi = indexSlice.injectEndpoints({
 
     deleteEvent: builder.mutation({
       query: (id) => ({
-        url: `/api/academic/event/${id}`,
+        url:`/api/academic/event/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["academic"],
     }),
     getachievement: builder.query({
       query: () => ({
-        url: "/api/academic/achievement ",
+        url:"/api/academic/achievement",
         method: "GET",
       }),
 
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.event || [];
-      },
       providesTags: ["academic"],
     }),
 
     createachievement: builder.mutation({
       query: (data) => ({
-        url: "/api/academic/achievement ",
+        url:"/api/academic/achievement",
         method: "POST",
         body: data,
       }),
@@ -66,16 +61,16 @@ export const academicApi = indexSlice.injectEndpoints({
 
     updateachievement: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/api/academic/achievement /${id}`,
-        method: "PUT",
-        body: data,
+        url:`/api/academic/achievement/${id}`,
+        method:"PUT",
+        body:data,
       }),
       invalidatesTags: ["academic"],
     }),
 
     deleteachievement: builder.mutation({
       query: (id) => ({
-        url: `/api/academic/achievement /${id}`,
+        url:`/api/academic/achievement/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["academic"],
@@ -83,7 +78,7 @@ export const academicApi = indexSlice.injectEndpoints({
 
     getquestion_bank: builder.query({
       query: () => ({
-        url: "/api/academic/question-bank",
+        url:"/api/academic/question-bank",
         method: "GET",
       }),
 
@@ -97,7 +92,7 @@ export const academicApi = indexSlice.injectEndpoints({
 
     createquestion_bank: builder.mutation({
       query: (data) => ({
-        url: "/api/academic/question-bank",
+        url:"/api/academic/question-bank",
         method: "POST",
         body: data,
       }),
@@ -106,7 +101,7 @@ export const academicApi = indexSlice.injectEndpoints({
 
     updatequestion_bank: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/api/academic/question-bank/${id}`,
+        url:`/api/academic/question-bank/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -115,7 +110,7 @@ export const academicApi = indexSlice.injectEndpoints({
 
     deletequestion_bank: builder.mutation({
       query: (id) => ({
-        url: `/api/academic/question-bank/${id}`,
+        url:`/api/academic/question-bank/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["academic"],

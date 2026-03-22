@@ -19,6 +19,10 @@ import VacancyManagement from "../component/pages/vacancy/Vacancy_Management";
 
 export const adminRoutes = [
   {
+    index: true, // Default route for /admin
+    element: <Dashboard />,
+  },
+  {
     path: "dashboard",
     element: <Dashboard />,
   },

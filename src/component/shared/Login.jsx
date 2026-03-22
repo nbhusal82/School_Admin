@@ -39,7 +39,7 @@ const AdminLogin = () => {
             />
           </div>
           <h1 className="text-xl font-extrabold text-gray-800 tracking-tight uppercase">
-            Namuna <span className="text-blue-600">School</span>
+            Namuna Vidhya <span className="text-blue-600">Sadan</span>
           </h1>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
             Admin Login

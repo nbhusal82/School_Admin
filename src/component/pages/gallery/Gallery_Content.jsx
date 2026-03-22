@@ -39,6 +39,8 @@ const Gallery = () => {
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [previews, setPreviews] = useState([]);
+  const [alertMsg, setAlertMsg] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [form, setForm] = useState({
     category_id: "",
     caption: "",
@@ -86,10 +88,17 @@ const Gallery = () => {
     if (window.confirm("Are you sure to delete this Gallery?")) {
       try {
         await deleteGallery(id).unwrap();
+        setConfirmOpen(true);
       } catch (err) {
         console.error(err);
       }
     }
+  };
+  const confirmDelete = async () => {
+    await deleteEvent(selectedId);
+    setConfirmOpen(false);
+    setAlertMsg("Event deleted successfully!");
+    setAlertOpen(true);
   };
 
   // Add / Update handler

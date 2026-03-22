@@ -1,7 +1,7 @@
 export const siteData = [
   {
     id: 1,
-    name: "Namuna school ",
+    name: "Namuna  Vidhya Sadan ",
     number: "9825593995",
     telphone: "081 - 540445",
     solgon: "hello",

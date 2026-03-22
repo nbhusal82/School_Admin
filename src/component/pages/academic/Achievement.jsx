@@ -66,7 +66,7 @@ const Achievement = () => {
     data.append("title", formData.title);
     data.append("description", formData.description);
     data.append("achievement_date", formData.achievement_date);
-    if (formData.image) data.append("image", formData.image);
+    if (formData.image) data.append("images", formData.image);
 
     try {
       if (editingAch) {

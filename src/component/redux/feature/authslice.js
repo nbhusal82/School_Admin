@@ -20,7 +20,7 @@ export const authApi = indexSlice.injectEndpoints({
     }),
     getDashboardStats: builder.query({
       query: () => ({
-        url: "/api/auth/dashboard-stats",
+        url:"/api/auth/dashboard-stats",
         method: "GET",
       }),
       providesTags: ["auth"],
