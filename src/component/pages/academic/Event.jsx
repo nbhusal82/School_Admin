@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Trash2, X, Calendar } from "lucide-react";
+import TableSkeleton from "../../shared/Skeleton_table";
 import {
   useCreateEventMutation,
   useDeleteEventMutation,
@@ -38,7 +39,30 @@ const Event = () => {
     if (window.confirm("Delete this event?")) await deleteEvent(id);
   };
 
-  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
+  if (isLoading) return (
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+        <div>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Events Management</h1>
+          <p className="text-xs text-gray-500 italic">Manage school events</p>
+        </div>
+      </div>
+      <div className="hidden lg:block">
+        <TableSkeleton rows={5} columns={7} />
+      </div>
+      <div className="lg:hidden space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl shadow-sm border p-4 animate-pulse">
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-12 bg-gray-300 rounded"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
@@ -92,7 +116,7 @@ const Event = () => {
                 </td>
                 <td className="p-3">
                   <img
-                    src={`${imageurl}${event.pdf_url}`}
+                    src={`${imageurl}/${event.pdf_url}`}
                     alt="event"
                     className="w-12 h-9 object-cover rounded"
                   />

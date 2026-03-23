@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
+import TableSkeleton from "../redux/feature/../../shared/Skeleton_table";
 import {
   useCreateReviewMutation,
   useDeleteReviewMutation,
@@ -64,7 +65,17 @@ const Review = () => {
     }
   };
 
-  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
+  if (isLoading) return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Review Management</h1>
+          <p className="text-xs text-gray-500 italic">Manage customer reviews</p>
+        </div>
+      </div>
+      <TableSkeleton rows={5} columns={6} />
+    </div>
+  );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -106,9 +117,13 @@ const Review = () => {
                     alt={review.name}
                   />
                 </td>
-                <td className="p-3 font-medium text-gray-700">{review.name}</td>
-                <td className="p-3 text-gray-500">{review.position}</td>
-                <td className="p-3 text-gray-600 max-w-xs truncate">
+                <td className="p-3 font-medium text-black-900">
+                  {review.name}
+                </td>
+                <td className="p-3 text-black-900 font-medium">
+                  {review.position}
+                </td>
+                <td className="p-3 text-black-900 max-w-xs  font-medium truncate">
                   {review.review_text}
                 </td>
                 <td className="p-3">

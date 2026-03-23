@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pencil, Trash2, Plus, X, User, Briefcase, Mail, Phone, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import TableSkeleton from "../../shared/Skeleton_table";
 import {
   useCreateTeamMutation,
   useDeleteTeamMutation,
@@ -93,7 +94,32 @@ const Team = () => {
 
   const formatDate = (date) => new Date(date).toLocaleDateString();
 
-  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
+  if (isLoading) return (
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Team Management</h1>
+          <p className="text-xs text-gray-500 italic">Manage your organization's hierarchy and members</p>
+        </div>
+      </div>
+      <div className="hidden lg:block">
+        <TableSkeleton rows={5} columns={6} />
+      </div>
+      <div className="lg:hidden space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-lg shadow-sm border p-4 animate-pulse">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-12 h-12 rounded-full bg-gray-300"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen relative">

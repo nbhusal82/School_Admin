@@ -9,6 +9,7 @@ import {
   Type,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import TableSkeleton from "../../shared/Skeleton_table";
 
 import {
   useDelete_blogsMutation,
@@ -23,7 +24,7 @@ const BlogManagement = () => {
   const imgurl = import.meta.env.VITE_BASE_URL;
 
   // Data fetching
-  const { data: blogRes } = useGetblogsQuery();
+  const { data: blogRes, isLoading } = useGetblogsQuery();
   const { data: catRes } = useGetblog_categoryQuery();
   const blogs = blogRes?.data || [];
   const categories = catRes?.data || [];
@@ -85,6 +86,18 @@ const BlogManagement = () => {
     }
   };
 
+  if (isLoading) return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Blog Management</h1>
+          <p className="text-gray-500 text-xs">Manage your content and categories</p>
+        </div>
+      </div>
+      <TableSkeleton rows={5} columns={4} />
+    </div>
+  );
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* HEADER SECTION */}
@@ -136,8 +149,8 @@ const BlogManagement = () => {
                     alt=""
                   />
                 </td>
-                <td className="p-3 font-medium text-gray-700">{blog.title}</td>
-                <td className="p-3 text-gray-500">
+                <td className="p-3 font-medium text-gray-900">{blog.title}</td>
+                <td className="p-3 font-medium text-gray-900">
                   {categories.find(
                     (c) => String(c.category_id) === String(blog.category_id),
                   )?.category_name || "N/A"}

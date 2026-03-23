@@ -19,6 +19,7 @@ import {
   useLogoutMutation,
 } from "../redux/feature/authslice";
 import { logout as logoutAction } from "../redux/feature/authState";
+import DashboardSkeleton from "../shared/Skeleton_Dashboard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -84,12 +85,7 @@ const [showScrollTop, setShowScrollTop] = useState(false);
     }
   }, [statsData]);
 
-  if (isLoading)
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#f8fafc]">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-600"></div>
-      </div>
-    );
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-10 font-sans">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2, X, Loader2, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import TableSkeleton from "../../shared/Skeleton_table";
 
 import {
   useCreatevacancyMutation,
@@ -119,7 +120,30 @@ const VacancyManagement = () => {
     }
   };
 
-  if (isLoading) return <div className="p-20 text-center">Loading...</div>;
+  if (isLoading) return (
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+        <div>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Vacancy Management</h1>
+          <p className="text-xs text-gray-500">Manage job vacancies</p>
+        </div>
+      </div>
+      <div className="hidden lg:block">
+        <TableSkeleton rows={5} columns={6} />
+      </div>
+      <div className="lg:hidden space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl shadow border p-4 animate-pulse">
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
@@ -133,7 +157,7 @@ const VacancyManagement = () => {
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => navigate("/admin/vacancy/category")}
-            className="border px-3 py-2 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold min-h-[44px] flex items-center gap-2"
+            className="border px-3 py-2 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold min-h-11 flex items-center gap-2"
           >
             <span className="hidden sm:inline">View Category</span>
             <span className="sm:hidden">Category</span>
@@ -151,7 +175,7 @@ const VacancyManagement = () => {
               });
               setIsModalOpen(true);
             }}
-            className="bg-[#211636] text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-semibold hover:opacity-90 min-h-[44px]"
+            className="bg-[#211636] text-white px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-semibold hover:opacity-90 min-h-11"
           >
             <Plus size={18} /> 
             <span className="hidden sm:inline">Add Vacancy</span>
@@ -244,13 +268,13 @@ const VacancyManagement = () => {
               <div className="flex gap-1">
                 <button
                   onClick={() => handleEdit(item)}
-                  className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg min-h-11 min-w-11 flex items-center justify-center"
                 >
                   <Pencil size={16} />
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg min-h-11 min-w-11 flex items-center justify-center"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -271,7 +295,7 @@ const VacancyManagement = () => {
                 <select
                   value={item.status}
                   onChange={(e) => handleStatusChange(item, e.target.value)}
-                  className={`border rounded px-2 py-1 text-sm font-semibold min-h-[44px] ${
+                  className={`border rounded px-2 py-1 text-sm font-semibold min-h-11 ${
                     item.status === "open"
                       ? "text-green-600"
                       : item.status === "closed"
@@ -295,7 +319,7 @@ const VacancyManagement = () => {
           <div className="bg-white w-full max-w-sm sm:max-w-md rounded-2xl p-4 sm:p-5 shadow-xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute right-3 top-3 p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="absolute right-3 top-3 p-2 hover:bg-gray-100 rounded-lg min-h-11 min-w-11 flex items-center justify-center"
             >
               <X size={20} />
             </button>
@@ -312,7 +336,7 @@ const VacancyManagement = () => {
                   value={form.title}
                   onChange={handleInput}
                   placeholder="Vacancy title"
-                  className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                  className="w-full border p-3 rounded-lg text-sm min-h-11"
                   required
                 />
               </div>
@@ -324,7 +348,7 @@ const VacancyManagement = () => {
                   value={form.description}
                   onChange={handleInput}
                   placeholder="Job description"
-                  className="w-full border p-3 rounded-lg text-sm min-h-[80px] resize-none"
+                  className="w-full border p-3 rounded-lg text-sm min-h-20 resize-none"
                   required
                 />
               </div>
@@ -336,7 +360,7 @@ const VacancyManagement = () => {
                     name="category_id"
                     value={form.category_id}
                     onChange={handleInput}
-                    className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                    className="w-full border p-3 rounded-lg text-sm min-h-11"
                     required
                   >
                     <option value="">Select Category</option>
@@ -354,7 +378,7 @@ const VacancyManagement = () => {
                     name="status"
                     value={form.status}
                     onChange={handleInput}
-                    className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                    className="w-full border p-3 rounded-lg text-sm min-h-11"
                   >
                     <option value="open">Open</option>
                     <option value="closed">Closed</option>
@@ -370,7 +394,7 @@ const VacancyManagement = () => {
                   name="deadline"
                   value={form.deadline}
                   onChange={handleInput}
-                  className="w-full border p-3 rounded-lg text-sm min-h-[44px]"
+                  className="w-full border p-3 rounded-lg text-sm min-h-11"
                   required
                 />
               </div>
@@ -379,14 +403,14 @@ const VacancyManagement = () => {
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
-                  className="flex-1 py-3 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50 min-h-[44px]"
+                  className="flex-1 py-3 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50 min-h-11"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating || isUpdating}
-                  className="flex-1 bg-[#211636] text-white py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 text-sm font-semibold min-h-[44px]"
+                  className="flex-1 bg-[#211636] text-white py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 text-sm font-semibold min-h-11"
                 >
                   {isCreating || isUpdating ? (
                     <>

@@ -1,257 +1,166 @@
 import React, { useState } from "react";
+import { FolderOpen, Loader2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import TableSkeleton from "../../shared/Skeleton_table";
+import Table from "../../shared/Table";
+import AddButton from "../../shared/AddButton";
+import PageHeader from "../../shared/PageHeader";
+import Modal from "../../shared/Modal";
+import ConfirmDialog from "../../shared/ConfirmDialog";
+import { ActionButtons } from "../../shared/ActionButtons";
 
 import {
-  Plus,
-  Pencil,
-  Trash2,
-  X,
-  FolderOpen,
-  Filter,
-  Loader2,
-} from "lucide-react";
+  useGetcategory_galleryQuery,
+  useCreatecategory_galleryMutation,
+  useDeletecategory_galleryMutation,
+  useUpdatecategory_galleryMutation,
+} from "../../redux/feature/category";
 
-import {
-  useCreategalleryMutation,
-  useDeletegalleryMutation,
-  useGetgalleryQuery,
-  useUpdategalleryMutation,
-} from "../../redux/feature/content";
-
-import { useGetcategory_galleryQuery } from "../../redux/feature/category";
-
-const Gallery = () => {
+const GalleryCategory = () => {
   const navigate = useNavigate();
-
-  const { data: gallery = [], isLoading } = useGetgalleryQuery();
-  const { data: catRes } = useGetcategory_galleryQuery();
+  const { data: catRes, isLoading } = useGetcategory_galleryQuery();
   const categories = catRes?.data || [];
 
-  const [createGallery, { isLoading: isCreating }] = useCreategalleryMutation();
-  const [updateGallery, { isLoading: isUpdating }] = useUpdategalleryMutation();
-  const [deleteGallery] = useDeletegalleryMutation();
+  const [createCategory, { isLoading: isCreating }] = useCreatecategory_galleryMutation();
+  const [deleteCategory] = useDeletecategory_galleryMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdatecategory_galleryMutation();
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [previews, setPreviews] = useState([]);
-
-  // ✅ Dialog states
+  const [catName, setCatName] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMsg, setAlertMsg] = useState("");
-
-  const [form, setForm] = useState({
-    category_id: "",
-    caption: "",
-    images: [],
-  });
-
-  const imageurl = import.meta.env.VITE_IMAGE_URL;
-
-  const filteredGallery =
-    selectedCategory === "All"
-      ? gallery?.data || []
-      : (gallery?.data || []).filter(
-          (n) => String(n.category_id) === String(selectedCategory),
-        );
 
   const openModal = (item = null) => {
     setEditing(item);
-    setPreviews([]);
-    setForm(
-      item
-        ? { category_id: item.category_id, caption: item.caption, images: [] }
-        : { category_id: "", caption: "", images: [] },
-    );
+    setCatName(item ? (item.category_name || item.name) : "");
     setModal(true);
   };
 
   const closeModal = () => {
     setModal(false);
     setEditing(null);
-    setPreviews([]);
-    setForm({ category_id: "", caption: "", images: [] });
+    setCatName("");
   };
 
-  const handleFiles = (e) => {
-    const files = e.target.files;
-    setForm({ ...form, images: files });
-    setPreviews(Array.from(files).map((f) => URL.createObjectURL(f)));
-  };
-
-  // ✅ OPEN CONFIRM DIALOG
-  const handleDelete = (id) => {
-    setSelectedId(id);
-    setConfirmOpen(true);
-  };
-
-  // ✅ CONFIRM DELETE
-  const confirmDelete = async () => {
-    try {
-      await deleteGallery(selectedId).unwrap();
-      setConfirmOpen(false);
-      setAlertMsg("Gallery deleted successfully!");
-      setAlertOpen(true);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // ✅ ADD / UPDATE
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("category_id", form.category_id);
-    formData.append("caption", form.caption);
-
-    for (let i = 0; i < form.images.length; i++) {
-      formData.append("images", form.images[i]);
-    }
-
     try {
       if (editing) {
-        await updateGallery({ id: editing.id, data: formData }).unwrap();
-        setAlertMsg("Gallery updated successfully!");
+        await updateCategory({ id: editing.id, data: { name: catName } }).unwrap();
       } else {
-        await createGallery(formData).unwrap();
-        setAlertMsg("Gallery added successfully!");
+        await createCategory({ name: catName }).unwrap();
       }
-
-      setAlertOpen(true);
       closeModal();
     } catch (err) {
-      console.error(err);
+      console.error("Failed to save category", err);
     }
   };
 
-  if (isLoading) return <p className="p-8 text-center">Loading...</p>;
+  const handleDelete = async () => {
+    try {
+      await deleteCategory(selectedId).unwrap();
+      setConfirmOpen(false);
+    } catch (err) {
+      console.error("Failed to delete", err);
+    }
+  };
+
+  if (isLoading) return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <PageHeader title="Gallery Categories" subtitle="Manage and organize your photo albums">
+        <button onClick={() => navigate("/admin/gallery")} className="p-2 hover:bg-white rounded-full border border-transparent hover:border-gray-200 transition bg-white shadow-sm">
+          <ArrowLeft size={20} className="text-gray-600" />
+        </button>
+      </PageHeader>
+      <div className="max-w-2xl">
+        <TableSkeleton rows={5} columns={3} />
+      </div>
+    </div>
+  );
+
+  const columns = [
+    {
+      header: "S.N",
+      accessor: "id",
+      className: "w-16",
+      render: (row, index) => <span className="text-gray-400">{index + 1}</span>,
+    },
+    {
+      header: "Category Name",
+      accessor: "name",
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-50 rounded-md text-blue-500">
+            <FolderOpen size={16} />
+          </div>
+          <span className="font-medium text-gray-700">{row.category_name || row.name}</span>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* HEADER */}
-      <div className="flex justify-between mb-6">
-        <h1 className="text-xl font-bold">Gallery</h1>
-        <button
-          onClick={() => openModal()}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex gap-2"
-        >
-          <Plus size={16} /> Add
+      <PageHeader title="Gallery Categories" subtitle="Manage and organize your photo albums">
+        <button onClick={() => navigate("/admin/gallery")} className="p-2 hover:bg-white rounded-full border border-transparent hover:border-gray-200 transition bg-white shadow-sm mr-2">
+          <ArrowLeft size={20} className="text-gray-600" />
         </button>
-      </div>
+        <AddButton onClick={() => openModal()} label="Add Category" />
+      </PageHeader>
 
-      {/* GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {filteredGallery.map((item) => {
-          const images = item.image_url?.split(",") || [];
-
-          return (
-            <div key={item.id} className="bg-white p-3 rounded-xl shadow">
-              <Swiper modules={[Navigation, Pagination]} navigation pagination>
-                {images.map((img, i) => (
-                  <SwiperSlide key={i}>
-                    <img
-                      src={`${imageurl}/${img}`}
-                      className="h-40 w-full object-cover rounded"
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-
-              <p className="text-sm mt-2">{item.caption}</p>
-
-              <div className="flex justify-between mt-3">
-                <button onClick={() => openModal(item)}>
-                  <Pencil size={16} />
-                </button>
-                <button onClick={() => handleDelete(item.id)}>
-                  <Trash2 size={16} className="text-red-500" />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* MODAL */}
-      {modal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white p-5 rounded-xl w-80 space-y-3"
-          >
-            <input
-              placeholder="Caption"
-              className="w-full border p-2"
-              value={form.caption}
-              onChange={(e) => setForm({ ...form, caption: e.target.value })}
+      <div className="max-w-2xl">
+        <Table
+          columns={columns}
+          data={categories}
+          actions={(row) => (
+            <ActionButtons
+              onEdit={() => openModal(row)}
+              onDelete={() => {
+                setSelectedId(row.id);
+                setConfirmOpen(true);
+              }}
             />
+          )}
+          emptyMessage='No categories found. Click "Add Category" to start.'
+        />
+      </div>
 
-            <input type="file" multiple onChange={handleFiles} />
-
-            <div className="flex gap-2">
-              <button type="button" onClick={closeModal}>
-                Cancel
-              </button>
-              <button type="submit">
-                {isCreating || isUpdating ? (
-                  <Loader2 className="animate-spin" />
-                ) : editing ? (
-                  "Update"
-                ) : (
-                  "Upload"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* ✅ CONFIRM DELETE */}
-      {confirmOpen && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black/40">
-          <div className="bg-white p-5 rounded-xl w-80">
-            <h2 className="font-bold">Confirm Delete</h2>
-            <p className="text-sm text-gray-500 my-2">
-              Are you sure you want to delete?
-            </p>
-
-            <div className="flex gap-2">
-              <button onClick={() => setConfirmOpen(false)}>Cancel</button>
-              <button
-                onClick={confirmDelete}
-                className="bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ✅ SUCCESS ALERT */}
-      {alertOpen && (
-        <div className="fixed inset-0 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-xl shadow">
-            <p>{alertMsg}</p>
-            <button
-              onClick={() => setAlertOpen(false)}
-              className="mt-2 bg-blue-600 text-white px-3 py-1 rounded"
-            >
-              OK
+      <Modal
+        isOpen={modal}
+        onClose={closeModal}
+        title={editing ? "Edit Category" : "Add Category"}
+        size="sm"
+      >
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            autoFocus required value={catName}
+            onChange={(e) => setCatName(e.target.value)}
+            placeholder="Category name"
+            className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          />
+          <div className="flex gap-2 pt-1">
+            <button type="button" onClick={closeModal} className="flex-1 py-1.5 text-sm text-gray-500 border rounded-lg hover:bg-gray-50">Cancel</button>
+            <button type="submit" disabled={isCreating || isUpdating} className="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2">
+              {isCreating || isUpdating ? (
+                <><Loader2 size={16} className="animate-spin" /> Saving...</>
+              ) : (
+                editing ? "Update" : "Save"
+              )}
             </button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Category?"
+        message="This action will remove the category."
+      />
     </div>
   );
 };
 
-export default Gallery;
+export default GalleryCategory;

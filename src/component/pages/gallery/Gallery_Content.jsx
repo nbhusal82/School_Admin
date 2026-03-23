@@ -5,6 +5,7 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import TableSkeleton from "../../shared/Skeleton_table";
 
 import {
   Plus,
@@ -123,7 +124,28 @@ const Gallery = () => {
     }
   };
 
-  if (isLoading) return <p className="p-8 text-center font-bold">Loading...</p>;
+  if (isLoading) return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Gallery</h1>
+          <p className="text-gray-500 font-medium">Loading gallery items...</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+            <div className="h-48 bg-gray-300"></div>
+            <div className="p-4 space-y-3">
+              <div className="h-4 bg-gray-200 rounded w-20"></div>
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">

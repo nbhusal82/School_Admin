@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
+import TableSkeleton from "../redux/feature/../../shared/Skeleton_table";
 import {
   useGetFaqsQuery,
   useCreateFaqMutation,
@@ -47,7 +48,17 @@ const FAQPage = () => {
     } catch (err) { console.error(err); }
   };
 
-  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
+  if (isLoading) return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">FAQ Management</h1>
+          <p className="text-xs text-gray-500 italic">Manage frequently asked questions</p>
+        </div>
+      </div>
+      <TableSkeleton rows={5} columns={4} />
+    </div>
+  );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">

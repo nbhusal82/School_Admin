@@ -82,8 +82,27 @@ const Achievement = () => {
 
   if (isFetching)
     return (
-      <div className="p-10 text-center text-gray-400">
-        Loading Achievements...
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <Award className="text-amber-500" /> School Achievements
+            </h1>
+            <p className="text-xs text-gray-500 italic">Showcase awards and milestones</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl shadow-sm border overflow-hidden animate-pulse">
+              <div className="h-40 bg-gray-300"></div>
+              <div className="p-4 space-y-2">
+                <div className="h-3 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-full"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
 
