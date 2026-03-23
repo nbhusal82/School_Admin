@@ -1,17 +1,15 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  Plus,
-  Trash2,
   FileText,
-  LayoutGrid,
+  FolderOpen,
+  Filter,
   Calendar,
   ExternalLink,
-  X,
-  Save,
-  Upload,
-  Loader2,
+  Trash2,
 } from "lucide-react";
+import PageHeader from "../../shared/PageHeader";
+import Modal from "../../shared/Modal";
+import Button, { AddButton } from "../../shared/Button";
 
 import {
   useDeleteNoticeMutation,
@@ -19,66 +17,90 @@ import {
   useCreateNoticeMutation,
 } from "../../redux/feature/content";
 
-import { useGetcategory_noticeQuery } from "../../redux/feature/category";
+import { 
+  useGetcategory_noticeQuery,
+  useCreatecategory_noticeMutation,
+  useDeletecategory_noticeMutation,
+} from "../../redux/feature/category";
 
 const NoticeManagement = () => {
-  const navigate = useNavigate();
   const { data: notices, isLoading } = useGetNoticeQuery();
   const { data: categories = [] } = useGetcategory_noticeQuery();
   const [deleteNotice] = useDeleteNoticeMutation();
   const [createNotice, { isLoading: isCreating }] = useCreateNoticeMutation();
 
+  const [createCategory, { isLoading: isCreatingCat }] = useCreatecategory_noticeMutation();
+  const [deleteCategory] = useDeletecategory_noticeMutation();
+
   const imageurl = import.meta.env.VITE_IMAGE_URL;
 
-  const [showForm, setShowForm] = useState(false);
+  // Notice Modal States
+  const [noticeModal, setNoticeModal] = useState(false);
   const [filter, setFilter] = useState("All");
-  const [form, setForm] = useState({
+  const [noticeForm, setNoticeForm] = useState({
     title: "",
     category_id: "",
     notice_date: "",
     attachment: null,
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
+  // Category Modal States
+  const [categoryModal, setCategoryModal] = useState(false);
+  const [categoryName, setCategoryName] = useState("");
 
-  const handleFileChange = (e) => {
-    setForm({ ...form, attachment: e.target.files[0] });
-  };
-
-  const handleSubmit = async (e) => {
+  // Notice Handlers
+  const handleNoticeSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("title", form.title);
-    formData.append("category_id", form.category_id);
-    formData.append("notice_date", form.notice_date);
-    if (form.attachment) formData.append("attachment", form.attachment);
+    formData.append("title", noticeForm.title);
+    formData.append("category_id", noticeForm.category_id);
+    formData.append("notice_date", noticeForm.notice_date);
+    if (noticeForm.attachment) formData.append("attachment", noticeForm.attachment);
 
     try {
       await createNotice(formData).unwrap();
-      setForm({
+      setNoticeForm({
         title: "",
         category_id: "",
         notice_date: "",
         attachment: null,
       });
-      setShowForm(false);
+      setNoticeModal(false);
     } catch (err) {
       console.log(err);
     }
   };
 
+  const handleDeleteNotice = async (id) => {
+    if (window.confirm("Delete this notice?")) {
+      try {
+        await deleteNotice(id).unwrap();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  // Category Handlers
+  const openCategoryModal = () => {
+    setCategoryName("");
+    setCategoryModal(true);
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await createCategory({ category_name: categoryName }).unwrap();
+      setCategoryModal(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (isLoading)
     return (
-      <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Notices</h1>
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">School Dashboard</p>
-          </div>
-        </div>
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <PageHeader title="Notices" subtitle="Loading notices..." />
         <div className="grid gap-4 max-w-5xl">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="bg-white p-5 rounded-4xl border border-gray-100 shadow-sm animate-pulse">
@@ -103,34 +125,16 @@ const NoticeManagement = () => {
         );
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans">
-      {/* HEADER SECTION */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Notices
-          </h1>
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">
-            School Dashboard
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate("/admin/notice/category")}
-            className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
-            title="Manage Categories"
-          >
-            <LayoutGrid size={20} />
-          </button>
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all"
-          >
-            <Plus size={20} />
-            <span className="hidden sm:inline">New Notice</span>
-          </button>
-        </div>
-      </div>
+    <div className="p-6 bg-gray-50 min-h-screen font-sans">
+      <PageHeader title="Notices" subtitle="School Dashboard">
+        <button
+          onClick={() => openCategoryModal()}
+          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
+        >
+          <FolderOpen size={16} /> Manage Categories
+        </button>
+        <AddButton onClick={() => setNoticeModal(true)} label="New Notice" />
+      </PageHeader>
 
       {/* FILTER BUTTONS */}
       <div className="flex gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
@@ -150,108 +154,6 @@ const NoticeManagement = () => {
           </button>
         ))}
       </div>
-
-      {/* COMPACT ADD FORM MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
-            <div className="px-6 py-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-              <h2 className="font-extrabold text-gray-800">Add New Notice</h2>
-              <button
-                onClick={() => setShowForm(false)}
-                className="p-1.5 hover:bg-red-50 hover:text-red-500 text-gray-400 rounded-full transition-all"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
-                  Title
-                </label>
-                <input
-                  name="title"
-                  value={form.title}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Title of the notice..."
-                  className="w-full bg-gray-50 border-none p-3.5 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
-                    Category
-                  </label>
-                  <select
-                    name="category_id"
-                    value={form.category_id}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border-none p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="">Select</option>
-                    {categories.map((cat) => (
-                      <option key={cat.category_id} value={cat.category_id}>
-                        {cat.category_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    name="notice_date"
-                    value={form.notice_date}
-                    onChange={handleInputChange}
-                    className="w-full bg-gray-50 border-none p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
-                  Attachment
-                </label>
-                <div className="relative border-2 border-dashed border-gray-100 rounded-2xl p-4 text-center hover:bg-blue-50/50 transition-all group">
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                  <Upload
-                    size={18}
-                    className="mx-auto text-gray-300 mb-1 group-hover:text-blue-500 transition-colors"
-                  />
-                  <p className="text-[11px] text-gray-400 font-medium truncate">
-                    {form.attachment
-                      ? form.attachment.name
-                      : "Tap to upload file"}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isCreating}
-                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-100 flex justify-center items-center gap-2 mt-2 disabled:bg-gray-300 transition-all"
-              >
-                {isCreating ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <Save size={20} />
-                )}
-                {isCreating ? "Saving..." : "Publish Notice"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* NOTICE LISTING */}
       <div className="grid gap-4 max-w-5xl">
@@ -297,10 +199,7 @@ const NoticeManagement = () => {
                     </a>
                   )}
                   <button
-                    onClick={() =>
-                      window.confirm("Delete this notice?") &&
-                      deleteNotice(notice.id)
-                    }
+                    onClick={() => handleDeleteNotice(notice.id)}
                     className="p-2.5 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all"
                   >
                     <Trash2 size={20} />
@@ -317,6 +216,106 @@ const NoticeManagement = () => {
           </div>
         )}
       </div>
+
+      {/* NOTICE MODAL */}
+      <Modal
+        isOpen={noticeModal}
+        onClose={() => setNoticeModal(false)}
+        title="Add New Notice"
+        size="md"
+      >
+        <form onSubmit={handleNoticeSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Title</label>
+            <input
+              value={noticeForm.title}
+              onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })}
+              required
+              placeholder="Title of the notice..."
+              className="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Category</label>
+              <select
+                value={noticeForm.category_id}
+                onChange={(e) => setNoticeForm({ ...noticeForm, category_id: e.target.value })}
+                required
+                className="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select</option>
+                {categories.map((cat) => (
+                  <option key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Date</label>
+              <input
+                type="date"
+                value={noticeForm.notice_date}
+                onChange={(e) => setNoticeForm({ ...noticeForm, notice_date: e.target.value })}
+                className="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Attachment</label>
+            <input
+              type="file"
+              onChange={(e) => setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })}
+              className="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={() => setNoticeModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1" isLoading={isCreating}>
+              Publish Notice
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* CATEGORY MODAL */}
+      <Modal
+        isOpen={categoryModal}
+        onClose={() => setCategoryModal(false)}
+        title="Add Category"
+        size="sm"
+      >
+        <form onSubmit={handleCategorySubmit} className="space-y-3">
+          <div>
+            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
+              Category Name
+            </label>
+            <input
+              autoFocus
+              required
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="e.g. Academic"
+              className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <Button variant="outline" className="flex-1" onClick={() => setCategoryModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1" isLoading={isCreatingCat}>
+              Save
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

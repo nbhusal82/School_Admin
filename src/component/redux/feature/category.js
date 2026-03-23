@@ -62,6 +62,14 @@ export const categoryApi = indexSlice.injectEndpoints({
       }),
       invalidatesTags: ["category"],
     }),
+    updatecategory_notice: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/category/notice/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["category"],
+    }),
     get_vacancy_category: builder.query({
       query: () => ({
         url: "/api/category/vacancy",
@@ -135,6 +143,11 @@ export const categoryApi = indexSlice.injectEndpoints({
         method: "GET",
         body: data,
       }),
+      transformResponse: (response) => {
+        return Array.isArray(response)
+          ? response
+          : response.data || response.category || response.categories || [];
+      },
       providesTags: ["category"],
     }),
     create_team_category: builder.mutation({
@@ -146,19 +159,30 @@ export const categoryApi = indexSlice.injectEndpoints({
       // Optimistic update
       onQueryStarted: async (data, { dispatch, queryFulfilled }) => {
         const patchResult = dispatch(
-          categoryApi.util.updateQueryData('get_team_category', undefined, (draft) => {
-            draft.push({ ...data, category_id: Date.now(), temp: true });
-          })
+          categoryApi.util.updateQueryData(
+            "get_team_category",
+            undefined,
+            (draft) => {
+              if (Array.isArray(draft)) {
+                draft.push({ ...data, category_id: Date.now(), temp: true });
+              }
+            },
+          ),
         );
         try {
           const { data: result } = await queryFulfilled;
           dispatch(
-            categoryApi.util.updateQueryData('get_team_category', undefined, (draft) => {
-              const index = draft.findIndex(item => item.temp);
-              if (index !== -1) {
-                draft[index] = result.data || result;
-              }
-            })
+            categoryApi.util.updateQueryData(
+              "get_team_category",
+              undefined,
+              (draft) => {
+                if (!Array.isArray(draft)) return;
+                const index = draft.findIndex((item) => item.temp);
+                if (index !== -1) {
+                  draft[index] = result.data || result;
+                }
+              },
+            ),
           );
         } catch {
           patchResult.undo();
@@ -174,20 +198,28 @@ export const categoryApi = indexSlice.injectEndpoints({
       invalidatesTags: ["category"],
     }),
     update_team_category: builder.mutation({
-      query: ({ id, data }) => ({
+      query: ({ id, data, ...rest }) => ({
         url: `/api/category/team/${id}`,
         method: "PUT",
-        body: data,
+        body: data ?? rest,
       }),
       // Optimistic update for faster UI
-      onQueryStarted: async ({ id, data }, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async ({ id, data, ...rest }, { dispatch, queryFulfilled }) => {
+        const nextData = data ?? rest;
         const patchResult = dispatch(
-          categoryApi.util.updateQueryData('get_team_category', undefined, (draft) => {
-            const index = draft.findIndex(item => item.category_id === id);
-            if (index !== -1) {
-              draft[index] = { ...draft[index], ...data };
-            }
-          })
+          categoryApi.util.updateQueryData(
+            "get_team_category",
+            undefined,
+            (draft) => {
+              if (!Array.isArray(draft)) return;
+              const index = draft.findIndex(
+                (item) => item.category_id === id || item.id === id,
+              );
+              if (index !== -1) {
+                draft[index] = { ...draft[index], ...nextData };
+              }
+            },
+          ),
         );
         try {
           await queryFulfilled;
@@ -207,6 +239,7 @@ export const {
   useCreatecategory_noticeMutation,
   useGetcategory_noticeQuery,
   useDeletecategory_noticeMutation,
+  useUpdatecategory_noticeMutation,
   useGet_vacancy_categoryQuery,
   useCreatecategory_vacancyMutation,
   useDeletecategory_vacancyMutation,

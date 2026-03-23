@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TableSkeleton from "../../shared/Skeleton_table";
 import Table from "../../shared/Table";
-import AddButton from "../../shared/AddButton";
 import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
-import { ActionButtons } from "../../shared/ActionButtons";
+import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import {
   useCreate_team_categoryMutation,
   useDelete_team_categoryMutation,
@@ -172,30 +171,22 @@ const TeamCategory = () => {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
+            <Button
               type="button"
-              disabled={isCreating || isUpdating}
+              variant="outline"
+              className="flex-1"
               onClick={() => setModalOpen(false)}
-              className="flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-gray-600 transition"
+              disabled={isCreating || isUpdating}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isCreating || isUpdating}
-              className="flex-2 bg-blue-600 text-white py-4 rounded-[20px] text-xs font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-100 flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-70"
+              className="flex-2"
+              isLoading={isCreating || isUpdating}
             >
-              {isCreating || isUpdating ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Saving...
-                </>
-              ) : editingCat ? (
-                "Update Now"
-              ) : (
-                "Create Dept"
-              )}
-            </button>
+              {editingCat ? "Update Now" : "Create Dept"}
+            </Button>
           </div>
         </form>
       </Modal>

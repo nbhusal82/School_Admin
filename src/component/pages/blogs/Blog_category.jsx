@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TableSkeleton from "../../shared/Skeleton_table";
 import Table from "../../shared/Table";
-import AddButton from "../../shared/AddButton";
 import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
-import { ActionButtons } from "../../shared/ActionButtons";
+import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import {
   useCreate_blogs_categoryMutation,
   useGetblog_categoryQuery,
@@ -111,14 +110,12 @@ const BlogCategory = () => {
             className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
           />
           <div className="flex gap-2 pt-1">
-            <button type="button" onClick={() => setModalOpen(false)} className="flex-1 py-1.5 text-sm text-gray-500 border rounded-lg hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={isCreating || isUpdating} className="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2">
-              {isCreating || isUpdating ? (
-                <><Loader2 size={16} className="animate-spin" /> Saving...</>
-              ) : (
-                editingCat ? "Update" : "Save"
-              )}
-            </button>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1" isLoading={isCreating || isUpdating}>
+              {editingCat ? "Update" : "Save"}
+            </Button>
           </div>
         </form>
       </Modal>

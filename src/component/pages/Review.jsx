@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
-import TableSkeleton from "../redux/feature/../../shared/Skeleton_table";
+import PageHeader from "../shared/PageHeader";
+import Table from "../shared/Table";
+import Modal from "../shared/Modal";
+import Button, {
+  AddButton,
+  ActionButtons,
+  ConfirmDialog,
+} from "../shared/Button";
+import TableSkeleton from "../shared/Skeleton_table";
 import {
   useCreateReviewMutation,
   useDeleteReviewMutation,
@@ -12,11 +19,14 @@ const Review = () => {
   const { data: reviews = [], isLoading } = useGetreviewQuery();
   const [createReview, { isLoading: isCreating }] = useCreateReviewMutation();
   const [updateReview, { isLoading: isUpdating }] = useUpdateReviewMutation();
-  const [deleteReview] = useDeleteReviewMutation();
+  const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
 
   const imgurl = import.meta.env.VITE_IMAGE_URL;
 
+  // States
   const [modalOpen, setModalOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   const [editingReview, setEditingReview] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -42,8 +52,18 @@ const Review = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete this review?")) await deleteReview(id).unwrap();
+  const handleDeleteClick = (id) => {
+    setSelectedId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteReview(selectedId).unwrap();
+      setConfirmOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -53,6 +73,7 @@ const Review = () => {
     data.append("position", formData.position);
     data.append("review_text", formData.review_text);
     if (formData.image) data.append("image", formData.image);
+
     try {
       if (editingReview) {
         await updateReview({ id: editingReview.id, data }).unwrap();
@@ -65,189 +86,158 @@ const Review = () => {
     }
   };
 
-  if (isLoading) return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Review Management</h1>
-          <p className="text-xs text-gray-500 italic">Manage customer reviews</p>
-        </div>
+  // Table Columns Setup
+  const columns = [
+    {
+      header: "S.N",
+      render: (_, index) => <span className="text-gray-400">{index + 1}</span>,
+    },
+    {
+      header: "Image",
+      render: (row) => (
+        <img
+          src={`${imgurl}/${row.image}`}
+          className="w-10 h-10 rounded-full object-cover border"
+          alt={row.name}
+        />
+      ),
+    },
+    {
+      header: "Name",
+      accessor: "name",
+      cellClassName: "font-medium text-gray-900",
+    },
+    {
+      header: "Position",
+      accessor: "position",
+      cellClassName: "text-gray-900 font-medium",
+    },
+    {
+      header: "Review",
+      accessor: "review_text",
+      cellClassName: "text-gray-900 max-w-xs font-medium truncate",
+    },
+  ];
+
+  if (isLoading)
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <PageHeader
+          title="Review Management"
+          subtitle="Manage customer reviews"
+        />
+        <TableSkeleton rows={5} columns={6} />
       </div>
-      <TableSkeleton rows={5} columns={6} />
-    </div>
-  );
+    );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Review Management</h1>
-          <p className="text-xs text-gray-500 italic">
-            Manage customer reviews
-          </p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm shadow-sm"
-        >
-          <Plus size={16} /> Add Review
-        </button>
-      </div>
+      <PageHeader title="Review Management" subtitle="Manage customer reviews">
+        <AddButton onClick={openAddModal} label="Add Review" />
+      </PageHeader>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100 border-b text-gray-600 font-medium">
-            <tr>
-              <th className="p-3">S.N</th>
-              <th className="p-3">Image</th>
-              <th className="p-3">Name</th>
-              <th className="p-3">Position</th>
-              <th className="p-3">Review</th>
-              <th className="p-3 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {reviews.map((review, index) => (
-              <tr key={review.id} className="hover:bg-gray-50 transition">
-                <td className="p-3 text-gray-400">{index + 1}</td>
-                <td className="p-3">
-                  <img
-                    src={`${imgurl}/${review.image}`}
-                    className="w-10 h-10 rounded-full object-cover border"
-                    alt={review.name}
-                  />
-                </td>
-                <td className="p-3 font-medium text-black-900">
-                  {review.name}
-                </td>
-                <td className="p-3 text-black-900 font-medium">
-                  {review.position}
-                </td>
-                <td className="p-3 text-black-900 max-w-xs  font-medium truncate">
-                  {review.review_text}
-                </td>
-                <td className="p-3">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleEdit(review)}
-                      className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(review.id)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        columns={columns}
+        data={reviews}
+        actions={(row) => (
+          <ActionButtons
+            onEdit={() => handleEdit(row)}
+            onDelete={() => handleDeleteClick(row.id)}
+          />
+        )}
+      />
 
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setModalOpen(false)}
-          ></div>
-          <div className="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-5 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-gray-800 text-lg">
-                {editingReview ? "Edit Review" : "Add Review"}
-              </h2>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Reviewer name"
-                  className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Position
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.position}
-                  onChange={(e) =>
-                    setFormData({ ...formData, position: e.target.value })
-                  }
-                  placeholder="e.g. Parent, Student"
-                  className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Review
-                </label>
-                <textarea
-                  value={formData.review_text}
-                  onChange={(e) =>
-                    setFormData({ ...formData, review_text: e.target.value })
-                  }
-                  placeholder="Review text..."
-                  className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24 resize-none"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Photo
-                </label>
-                <input
-                  type="file"
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.files[0] })
-                  }
-                  className="w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700"
-                />
-              </div>
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="flex-1 py-1.5 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isCreating || isUpdating}
-                  className="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
-                >
-                  {isCreating || isUpdating
-                    ? editingReview
-                      ? "Updating..."
-                      : "Adding..."
-                    : editingReview
-                      ? "Update Review"
-                      : "Save Review"}
-                </button>
-              </div>
-            </form>
+      {/* Add/Edit Modal */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editingReview ? "Edit Review" : "Add Review"}
+        size="md"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Name
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              placeholder="Reviewer name"
+            />
           </div>
-        </div>
-      )}
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Position
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.position}
+              onChange={(e) =>
+                setFormData({ ...formData, position: e.target.value })
+              }
+              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              placeholder="e.g. Parent, Student"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Review
+            </label>
+            <textarea
+              required
+              value={formData.review_text}
+              onChange={(e) =>
+                setFormData({ ...formData, review_text: e.target.value })
+              }
+              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24 resize-none"
+              placeholder="Review text..."
+            />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Photo
+            </label>
+            <input
+              type="file"
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.files[0] })
+              }
+              className="w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1"
+              isLoading={isCreating || isUpdating}
+            >
+              {editingReview ? "Update Review" : "Save Review"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
