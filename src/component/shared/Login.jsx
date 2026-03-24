@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../redux/feature/authslice";
 import { useDispatch } from "react-redux";
 import { setUser } from "../redux/feature/authState";
 import logoImg from "../../assets/image/logo.jpg";
+import ErrorToast from "./ErrorToast";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -13,6 +14,15 @@ const AdminLogin = () => {
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    if (errorOpen) {
+      const timer = setTimeout(() => setErrorOpen(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +31,8 @@ const AdminLogin = () => {
       dispatch(setUser({ user: res.user, token: res.token }));
       navigate("/admin/dashboard");
     } catch (err) {
-      alert("Invalid credentials!");
+      setErrorMsg("Invalid email or password. Please try again.");
+      setErrorOpen(true);
     }
   };
 
@@ -108,6 +119,12 @@ const AdminLogin = () => {
           © 2026 Namuna Bidhya School
         </p>
       </div>
+
+      <ErrorToast
+        isOpen={errorOpen}
+        onClose={() => setErrorOpen(false)}
+        message={errorMsg}
+      />
     </div>
   );
 };

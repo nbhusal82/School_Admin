@@ -4,6 +4,7 @@ import Table from "../shared/Table";
 import Modal from "../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../shared/Button";
 import TableSkeleton from "../shared/Skeleton_table";
+import ConfirmDialog from "../shared/ConfirmDialog";
 import {
   useGetFaqsQuery,
   useCreateFaqMutation,
@@ -20,6 +21,8 @@ const FAQPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState(null);
   const [formData, setFormData] = useState({ question: "", answer: "" });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const openAddModal = () => {
     setEditingFaq(null);
@@ -33,9 +36,13 @@ const FAQPage = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete FAQ?")) {
-      try { await deleteFaq(id).unwrap(); } catch (err) { console.error(err); }
+  const handleDelete = async () => {
+    try {
+      await deleteFaq(deleteId).unwrap();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -76,7 +83,7 @@ const FAQPage = () => {
         actions={(row) => (
           <ActionButtons
             onEdit={() => handleEdit(row)}
-            onDelete={() => handleDelete(row._id || row.id)}
+            onDelete={() => { setDeleteId(row._id || row.id); setConfirmOpen(true); }}
           />
         )}
       />
@@ -118,6 +125,14 @@ const FAQPage = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDelete}
+        title="Delete FAQ?"
+        message="Are you sure you want to delete this FAQ? This action cannot be undone."
+      />
     </div>
   );
 };

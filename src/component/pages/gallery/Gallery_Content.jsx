@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -8,6 +9,7 @@ import { FolderOpen, Filter } from "lucide-react";
 import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton } from "../../shared/Button";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 import {
   useCreategalleryMutation,
   useDeletegalleryMutation,
@@ -22,6 +24,7 @@ import {
 } from "../../redux/feature/category";
 
 const Gallery = () => {
+  const navigate = useNavigate();
   const { data: gallery = [], isLoading } = useGetgalleryQuery();
   const { data: catRes } = useGetcategory_galleryQuery();
   const categories = catRes?.data || [];
@@ -51,6 +54,9 @@ const Gallery = () => {
   const [categoryModal, setCategoryModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryName, setCategoryName] = useState("");
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const imageurl = import.meta.env.VITE_IMAGE_URL;
 
@@ -93,13 +99,13 @@ const Gallery = () => {
     }
   };
 
-  const handleDeleteGallery = async (id) => {
-    if (window.confirm("Are you sure to delete this Gallery?")) {
-      try {
-        await deleteGallery(id).unwrap();
-      } catch (err) {
-        console.error(err);
-      }
+  const handleDeleteGallery = async () => {
+    try {
+      await deleteGallery(deleteId).unwrap();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -156,7 +162,7 @@ const Gallery = () => {
         subtitle={`Showing ${filteredGallery.length} items`}
       >
         <button
-          onClick={() => openCategoryModal()}
+          onClick={() => navigate("/admin/gallery/category")}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
           <FolderOpen size={16} /> Manage Categories
@@ -241,7 +247,7 @@ const Gallery = () => {
                       Edit
                     </Button>
                     <Button
-                      onClick={() => handleDeleteGallery(item.id)}
+                      onClick={() => { setDeleteId(item.id); setConfirmOpen(true); }}
                       variant="outline"
                       size="sm"
                       className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
@@ -380,6 +386,14 @@ const Gallery = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDeleteGallery}
+        title="Delete Gallery?"
+        message="Are you sure you want to delete this gallery item? This action cannot be undone."
+      />
     </div>
   );
 };

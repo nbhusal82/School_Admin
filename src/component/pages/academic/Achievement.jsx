@@ -3,6 +3,7 @@ import { Award, Calendar, ImageIcon } from "lucide-react";
 import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 import {
   useCreateachievementMutation,
   useDeleteachievementMutation,
@@ -28,6 +29,8 @@ const Achievement = () => {
     achievement_date: "",
     image: null,
   });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const openAddModal = () => {
     setEditingAch(null);
@@ -46,8 +49,14 @@ const Achievement = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete?")) await deleteAch(id);
+  const handleDelete = async () => {
+    try {
+      await deleteAch(deleteId).unwrap();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -101,7 +110,7 @@ const Achievement = () => {
             <div className="relative h-40 bg-gray-200">
               <img src={`${imgurl}/${ach.image_urls}`} alt="" className="w-full h-full object-cover" />
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                <ActionButtons onEdit={() => handleEdit(ach)} onDelete={() => handleDelete(ach.id)} />
+                <ActionButtons onEdit={() => handleEdit(ach)} onDelete={() => { setDeleteId(ach.id); setConfirmOpen(true); }} />
               </div>
             </div>
             <div className="p-4">
@@ -170,6 +179,14 @@ const Achievement = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDelete}
+        title="Delete Achievement?"
+        message="Are you sure you want to delete this achievement? This action cannot be undone."
+      />
     </div>
   );
 };

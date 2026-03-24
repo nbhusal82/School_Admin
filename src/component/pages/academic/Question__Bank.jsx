@@ -4,6 +4,7 @@ import Table from "../../shared/Table";
 import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import TableSkeleton from "../../shared/Skeleton_table";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 import {
   useCreatequestion_bankMutation,
   useDeletequestion_bankMutation,
@@ -13,19 +14,46 @@ import {
 
 const QuestionBankAdmin = () => {
   const { data: questions = [], isLoading } = useGetquestion_bankQuery();
-  const [createQuestion, { isLoading: isCreating }] = useCreatequestion_bankMutation();
-  const [updateQuestion, { isLoading: isUpdating }] = useUpdatequestion_bankMutation();
+  const [createQuestion, { isLoading: isCreating }] =
+    useCreatequestion_bankMutation();
+  const [updateQuestion, { isLoading: isUpdating }] =
+    useUpdatequestion_bankMutation();
   const [deleteQuestion] = useDeletequestion_bankMutation();
+  const baseurl = import.meta.env.VITE_BASE_URL;
 
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: "", subject: "", class_level: "", year: "", description: "", file: null });
+  const [form, setForm] = useState({
+    title: "",
+    subject: "",
+    class_level: "",
+    year: "",
+    description: "",
+    file: null,
+  });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const openModal = (question = null) => {
     setEditing(question);
-    setForm(question
-      ? { title: question.title, subject: question.subject, class_level: question.class_level, year: question.year, description: question.description, file: null }
-      : { title: "", subject: "", class_level: "", year: "", description: "", file: null }
+    setForm(
+      question
+        ? {
+            title: question.title,
+            subject: question.subject,
+            class_level: question.class_level,
+            year: question.year,
+            description: question.description,
+            file: null,
+          }
+        : {
+            title: "",
+            subject: "",
+            class_level: "",
+            year: "",
+            description: "",
+            file: null,
+          },
     );
     setModal(true);
   };
@@ -46,32 +74,79 @@ const QuestionBankAdmin = () => {
         await createQuestion(formData).unwrap();
       }
       setModal(false);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete this question?")) await deleteQuestion(id).unwrap();
+  const handleDelete = async () => {
+    try {
+      await deleteQuestion(deleteId).unwrap();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const columns = [
-    { header: "S.N", render: (_, index) => <span className="text-gray-400">{index + 1}</span> },
-    { header: "Title", accessor: "title", cellClassName: "font-medium text-gray-700" },
-    { header: "Subject", render: (row) => <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-xs">{row.subject}</span> },
-    { header: "Class", accessor: "class_level", cellClassName: "text-gray-500" },
+    {
+      header: "S.N",
+      render: (_, index) => <span className="text-gray-400">{index + 1}</span>,
+    },
+    {
+      header: "Title",
+      accessor: "title",
+      cellClassName: "font-medium text-gray-700",
+    },
+    {
+      header: "Subject",
+      render: (row) => (
+        <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-xs">
+          {row.subject}
+        </span>
+      ),
+    },
+    {
+      header: "Class",
+      accessor: "class_level",
+      cellClassName: "text-gray-500",
+    },
     { header: "Year", accessor: "year", cellClassName: "text-gray-500" },
-    { header: "File", render: (row) => row.file_type === "pdf" ? <a href={`http://localhost:5000/${row.file_url}`} target="_blank" className="text-blue-600 underline text-xs">View PDF</a> : <span className="text-gray-400 text-xs">No file</span> },
+    {
+      header: "File",
+      render: (row) =>
+        row.file_type === "pdf" ? (
+          <a
+            href={`${baseurl}/${row.file_url}`}
+            target="_blank"
+            className="text-blue-600 underline text-xs"
+          >
+            View PDF
+          </a>
+        ) : (
+          <span className="text-gray-400 text-xs">No file</span>
+        ),
+    },
   ];
 
-  if (isLoading) return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <PageHeader title="Question Bank" subtitle="Manage question papers and resources" />
-      <TableSkeleton rows={5} columns={7} />
-    </div>
-  );
+  if (isLoading)
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <PageHeader
+          title="Question Bank"
+          subtitle="Manage question papers and resources"
+        />
+        <TableSkeleton rows={5} columns={7} />
+      </div>
+    );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <PageHeader title="Question Bank" subtitle="Manage question papers and resources">
+      <PageHeader
+        title="Question Bank"
+        subtitle="Manage question papers and resources"
+      >
         <AddButton onClick={() => openModal()} label="Add Question" />
       </PageHeader>
 
@@ -81,7 +156,7 @@ const QuestionBankAdmin = () => {
         actions={(row) => (
           <ActionButtons
             onEdit={() => openModal(row)}
-            onDelete={() => handleDelete(row.id)}
+            onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
           />
         )}
       />
@@ -94,9 +169,12 @@ const QuestionBankAdmin = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Title</label>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Title
+            </label>
             <input
-              required value={form.title}
+              required
+              value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="Question title"
               className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
@@ -104,27 +182,38 @@ const QuestionBankAdmin = () => {
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Subject</label>
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                Subject
+              </label>
               <input
-                required value={form.subject}
+                required
+                value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
                 placeholder="e.g. Math"
                 className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Class</label>
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                Class
+              </label>
               <input
-                required value={form.class_level}
-                onChange={(e) => setForm({ ...form, class_level: e.target.value })}
+                required
+                value={form.class_level}
+                onChange={(e) =>
+                  setForm({ ...form, class_level: e.target.value })
+                }
                 placeholder="e.g. 10"
                 className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Year</label>
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                Year
+              </label>
               <input
-                required value={form.year}
+                required
+                value={form.year}
                 onChange={(e) => setForm({ ...form, year: e.target.value })}
                 placeholder="e.g. 2024"
                 className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
@@ -132,16 +221,23 @@ const QuestionBankAdmin = () => {
             </div>
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Description</label>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Description
+            </label>
             <textarea
-              required value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              required
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               placeholder="Description..."
               className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm h-20 resize-none"
             />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">File (PDF)</label>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              File (PDF)
+            </label>
             <input
               type="file"
               onChange={(e) => setForm({ ...form, file: e.target.files[0] })}
@@ -149,15 +245,31 @@ const QuestionBankAdmin = () => {
             />
           </div>
           <div className="flex gap-2 pt-3">
-            <Button variant="outline" className="flex-1" onClick={() => setModal(false)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setModal(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" isLoading={isCreating || isUpdating}>
+            <Button
+              type="submit"
+              className="flex-1"
+              isLoading={isCreating || isUpdating}
+            >
               {editing ? "Update Question" : "Save Question"}
             </Button>
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDelete}
+        title="Delete Question?"
+        message="Are you sure you want to delete this question? This action cannot be undone."
+      />
     </div>
   );
 };

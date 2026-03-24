@@ -4,6 +4,7 @@ import TableSkeleton from "../../shared/Skeleton_table";
 import Modal from "../../shared/Modal";
 import Button, { ActionButtons, AddButton } from "../../shared/Button";
 import Table from "../../shared/Table";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 
 import {
   useDelete_blogsMutation,
@@ -41,6 +42,8 @@ const BlogManagement = () => {
   const [description, setDescription] = useState("");
   const [publishedDate, setPublishedDate] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   // Open Add
   const openAdd = () => {
@@ -88,10 +91,10 @@ const BlogManagement = () => {
   };
 
   // Delete
-  const handleDeleteClick = (id) => {
-    if (window.confirm("Delete this blog?")) {
-      deleteBlog(id);
-    }
+  const handleDeleteClick = () => {
+    deleteBlog(deleteId);
+    setConfirmOpen(false);
+    setDeleteId(null);
   };
 
   // Columns (Vacancy style)
@@ -144,7 +147,7 @@ const BlogManagement = () => {
 
         <div className="flex gap-2">
           <button
-            onClick={() => openCategoryModal()}
+            onClick={() => navigate("/admin/blog/category")}
             className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
           >
             <FolderOpen size={16} /> Manage Categories
@@ -162,7 +165,7 @@ const BlogManagement = () => {
           actions={(row) => (
             <ActionButtons
               onEdit={() => handleEdit(row)}
-              onDelete={() => handleDeleteClick(row.id)}
+              onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
             />
           )}
         />
@@ -245,6 +248,14 @@ const BlogManagement = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDeleteClick}
+        title="Delete Blog?"
+        message="Are you sure you want to delete this blog? This action cannot be undone."
+      />
     </div>
   );
 };

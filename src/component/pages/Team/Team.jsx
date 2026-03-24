@@ -171,7 +171,7 @@ const Team = () => {
         subtitle={`Managing ${teamMembers.length} staff members`}
       >
         <button
-          onClick={() => openCategoryModal()}
+          onClick={() => navigate('/admin/team/category')}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
           <FolderOpen size={16} /> Manage Categories

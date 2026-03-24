@@ -20,6 +20,7 @@ import {
 } from "../redux/feature/authslice";
 import { logout as logoutAction } from "../redux/feature/authState";
 import DashboardSkeleton from "../shared/Skeleton_Dashboard";
+import ConfirmDialog from "../shared/ConfirmDialog";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -27,20 +28,20 @@ const Dashboard = () => {
   const { data: statsData, isLoading } = useGetDashboardStatsQuery();
   const [logout] = useLogoutMutation();
   const [dynamicStats, setDynamicStats] = useState([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Handle logout
   const handleLogout = async () => {
-    if (window.confirm("Logout?")) {
-      try {
-        await logout().unwrap();
-        dispatch(logoutAction()); // Clear Redux state
-        navigate("/");
-      } catch (error) {
-        console.error("Logout failed:", error);
-        dispatch(logoutAction()); // Clear state even if API fails
-        navigate("/");
-      }
+    try {
+      await logout().unwrap();
+      dispatch(logoutAction());
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      dispatch(logoutAction());
+      navigate("/");
     }
+    setConfirmOpen(false);
   };
 const [showScrollTop, setShowScrollTop] = useState(false);
   const [showLogout, setShowLogout] = useState(true);
@@ -91,7 +92,7 @@ const [showScrollTop, setShowScrollTop] = useState(false);
     <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-10 font-sans">
       {/* --- LOGOUT BUTTON (Scroll Sensitive) --- */}
       <button
-        onClick={handleLogout}
+        onClick={() => setConfirmOpen(true)}
         className={`fixed top-6 right-6 z-50 flex items-center gap-2 bg-white border border-gray-100 text-gray-700 hover:text-red-600 px-5 py-2.5 rounded-full shadow-md transition-all duration-500 font-bold text-sm
           ${showLogout ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}
         `}
@@ -191,6 +192,14 @@ const [showScrollTop, setShowScrollTop] = useState(false);
           <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleLogout}
+        title="Logout?"
+        message="Are you sure you want to logout from the admin panel?"
+      />
     </div>
   );
 };

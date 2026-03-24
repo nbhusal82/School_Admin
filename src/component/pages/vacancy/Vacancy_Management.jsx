@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FolderOpen } from "lucide-react";
 import PageHeader from "../../shared/PageHeader";
 import Table from "../../shared/Table";
 import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import TableSkeleton from "../../shared/Skeleton_table";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 
 import {
   useCreatevacancyMutation,
@@ -13,7 +15,7 @@ import {
   useUpdatevacancyMutation,
 } from "../../redux/feature/content";
 
-import { 
+import {
   useGet_vacancy_categoryQuery,
   useCreatecategory_vacancyMutation,
   useUpdatecategory_vacancyMutation,
@@ -21,6 +23,7 @@ import {
 } from "../../redux/feature/category";
 
 const VacancyManagement = () => {
+  const navigate = useNavigate();
   const { data: vacancyRes, isLoading, refetch } = useGetvacancyQuery();
   const { data: catRes } = useGet_vacancy_categoryQuery();
 
@@ -31,8 +34,10 @@ const VacancyManagement = () => {
   const [updateVacancy, { isLoading: isUpdating }] = useUpdatevacancyMutation();
   const [deleteVacancy] = useDeletevacancyMutation();
 
-  const [createCategory, { isLoading: isCreatingCat }] = useCreatecategory_vacancyMutation();
-  const [updateCategory, { isLoading: isUpdatingCat }] = useUpdatecategory_vacancyMutation();
+  const [createCategory, { isLoading: isCreatingCat }] =
+    useCreatecategory_vacancyMutation();
+  const [updateCategory, { isLoading: isUpdatingCat }] =
+    useUpdatecategory_vacancyMutation();
   const [deleteCategory] = useDeletecategory_vacancyMutation();
 
   // Vacancy Modal States
@@ -50,6 +55,9 @@ const VacancyManagement = () => {
   const [categoryModal, setCategoryModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryName, setCategoryName] = useState("");
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   // Vacancy Handlers
   const openVacancyModal = (item = null) => {
@@ -69,7 +77,7 @@ const VacancyManagement = () => {
             description: "",
             deadline: "",
             status: "open",
-          }
+          },
     );
     setVacancyModal(true);
   };
@@ -116,14 +124,14 @@ const VacancyManagement = () => {
     }
   };
 
-  const handleDeleteVacancy = async (id) => {
-    if (window.confirm("Are you sure to delete this vacancy?")) {
-      try {
-        await deleteVacancy(id).unwrap();
-        refetch();
-      } catch (err) {
-        console.error(err);
-      }
+  const handleDeleteVacancy = async () => {
+    try {
+      await deleteVacancy(deleteId).unwrap();
+      refetch();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -138,7 +146,10 @@ const VacancyManagement = () => {
     e.preventDefault();
     try {
       if (editingCategory) {
-        await updateCategory({ id: editingCategory.category_id, data: { name: categoryName } }).unwrap();
+        await updateCategory({
+          id: editingCategory.category_id,
+          data: { name: categoryName },
+        }).unwrap();
       } else {
         await createCategory({ name: categoryName }).unwrap();
       }
@@ -153,10 +164,15 @@ const VacancyManagement = () => {
     {
       header: "Category",
       render: (row) =>
-        categories.find((c) => String(c.category_id) === String(row.category_id))
-          ?.category_name || "N/A",
+        categories.find(
+          (c) => String(c.category_id) === String(row.category_id),
+        )?.category_name || "N/A",
     },
-    { header: "Deadline", accessor: "application_deadline", cellClassName: "text-center" },
+    {
+      header: "Deadline",
+      accessor: "application_deadline",
+      cellClassName: "text-center",
+    },
     { header: "Posted", accessor: "posted_date", cellClassName: "text-center" },
     {
       header: "Status",
@@ -168,8 +184,8 @@ const VacancyManagement = () => {
             row.status === "open"
               ? "text-green-600"
               : row.status === "closed"
-              ? "text-red-600"
-              : "text-yellow-600"
+                ? "text-red-600"
+                : "text-yellow-600"
           }`}
         >
           <option value="open">Open</option>
@@ -181,18 +197,22 @@ const VacancyManagement = () => {
     },
   ];
 
-  if (isLoading) return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <PageHeader title="Vacancy Management" subtitle="Manage job vacancies" />
-      <TableSkeleton rows={5} columns={6} />
-    </div>
-  );
+  if (isLoading)
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <PageHeader
+          title="Vacancy Management"
+          subtitle="Manage job vacancies"
+        />
+        <TableSkeleton rows={5} columns={6} />
+      </div>
+    );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <PageHeader title="Vacancy Management" subtitle="Manage job vacancies">
         <button
-          onClick={() => openCategoryModal()}
+          onClick={() => navigate("/admin/vacancy/category")}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
           <FolderOpen size={16} /> Manage Categories
@@ -206,7 +226,7 @@ const VacancyManagement = () => {
         actions={(row) => (
           <ActionButtons
             onEdit={() => openVacancyModal(row)}
-            onDelete={() => handleDeleteVacancy(row.id)}
+            onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
           />
         )}
       />
@@ -220,10 +240,14 @@ const VacancyManagement = () => {
       >
         <form onSubmit={handleVacancySubmit} className="space-y-3">
           <div>
-            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">Title</label>
+            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
+              Title
+            </label>
             <input
               value={vacancyForm.title}
-              onChange={(e) => setVacancyForm({ ...vacancyForm, title: e.target.value })}
+              onChange={(e) =>
+                setVacancyForm({ ...vacancyForm, title: e.target.value })
+              }
               placeholder="Vacancy title"
               className="w-full border p-2 rounded-lg text-sm"
               required
@@ -231,10 +255,14 @@ const VacancyManagement = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">Description</label>
+            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
+              Description
+            </label>
             <textarea
               value={vacancyForm.description}
-              onChange={(e) => setVacancyForm({ ...vacancyForm, description: e.target.value })}
+              onChange={(e) =>
+                setVacancyForm({ ...vacancyForm, description: e.target.value })
+              }
               placeholder="Job description"
               className="w-full border p-2 rounded-lg text-sm h-20 resize-none"
               required
@@ -243,10 +271,17 @@ const VacancyManagement = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">Category</label>
+              <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
+                Category
+              </label>
               <select
                 value={vacancyForm.category_id}
-                onChange={(e) => setVacancyForm({ ...vacancyForm, category_id: e.target.value })}
+                onChange={(e) =>
+                  setVacancyForm({
+                    ...vacancyForm,
+                    category_id: e.target.value,
+                  })
+                }
                 className="w-full border p-2 rounded-lg text-sm"
                 required
               >
@@ -260,10 +295,14 @@ const VacancyManagement = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">Status</label>
+              <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
+                Status
+              </label>
               <select
                 value={vacancyForm.status}
-                onChange={(e) => setVacancyForm({ ...vacancyForm, status: e.target.value })}
+                onChange={(e) =>
+                  setVacancyForm({ ...vacancyForm, status: e.target.value })
+                }
                 className="w-full border p-2 rounded-lg text-sm"
               >
                 <option value="open">Open</option>
@@ -274,21 +313,33 @@ const VacancyManagement = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">Application Deadline</label>
+            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
+              Application Deadline
+            </label>
             <input
               type="date"
               value={vacancyForm.deadline}
-              onChange={(e) => setVacancyForm({ ...vacancyForm, deadline: e.target.value })}
+              onChange={(e) =>
+                setVacancyForm({ ...vacancyForm, deadline: e.target.value })
+              }
               className="w-full border p-2 rounded-lg text-sm"
               required
             />
           </div>
 
           <div className="flex gap-2 pt-3">
-            <Button variant="outline" className="flex-1" onClick={() => setVacancyModal(false)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setVacancyModal(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" isLoading={isCreating || isUpdating}>
+            <Button
+              type="submit"
+              className="flex-1"
+              isLoading={isCreating || isUpdating}
+            >
               {editingVacancy ? "Update Vacancy" : "Save Vacancy"}
             </Button>
           </div>
@@ -318,15 +369,31 @@ const VacancyManagement = () => {
           </div>
 
           <div className="flex gap-2 pt-1">
-            <Button variant="outline" className="flex-1" onClick={() => setCategoryModal(false)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setCategoryModal(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" isLoading={isCreatingCat || isUpdatingCat}>
+            <Button
+              type="submit"
+              className="flex-1"
+              isLoading={isCreatingCat || isUpdatingCat}
+            >
               {editingCategory ? "Update" : "Save"}
             </Button>
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDeleteVacancy}
+        title="Delete Vacancy?"
+        message="Are you sure you want to delete this vacancy? This action cannot be undone."
+      />
     </div>
   );
 };

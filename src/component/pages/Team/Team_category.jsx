@@ -6,6 +6,7 @@ import Table from "../../shared/Table";
 import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 import {
   useCreate_team_categoryMutation,
   useDelete_team_categoryMutation,
@@ -35,6 +36,8 @@ const TeamCategory = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
   const [categoryName, setCategoryName] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const openAddModal = () => {
     setEditingCat(null);
@@ -49,27 +52,20 @@ const TeamCategory = () => {
   };
 
   // --- FIXED DELETE LOGIC ---
-  const handleDelete = async (id) => {
-    if (!id) return alert("Category ID not found!");
-
-    if (
-      window.confirm(
-        "Are you sure? Members linked to this category might be affected.",
-      )
-    ) {
-      try {
-        // .unwrap() use garnu parcha error catch garna
-        await deleteCat(id).unwrap();
-        // Successful delete pachi refetch garne (yadi tags set chaina vane)
-        refetch();
-      } catch (err) {
-        console.error("Delete Error:", err);
-        // Error message handling
-        const errorMsg =
-          err?.data?.message ||
-          "Cannot delete. This category might be in use by team members.";
-        alert("Delete Failed: " + errorMsg);
-      }
+  const handleDelete = async () => {
+    try {
+      await deleteCat(deleteId).unwrap();
+      refetch();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Delete Error:", err);
+      const errorMsg =
+        err?.data?.message ||
+        "Cannot delete. This category might be in use by team members.";
+      alert("Delete Failed: " + errorMsg);
+      setConfirmOpen(false);
+      setDeleteId(null);
     }
   };
 
@@ -140,7 +136,7 @@ const TeamCategory = () => {
           actions={(row) => (
             <ActionButtons
               onEdit={() => handleEdit(row)}
-              onDelete={() => handleDelete(row.category_id || row.id)}
+              onDelete={() => { setDeleteId(row.category_id || row.id); setConfirmOpen(true); }}
             />
           )}
           emptyMessage="No Categories Found"
@@ -190,6 +186,14 @@ const TeamCategory = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDelete}
+        title="Delete Category?"
+        message="Are you sure? Members linked to this category might be affected."
+      />
     </div>
   );
 };

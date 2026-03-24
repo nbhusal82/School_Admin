@@ -5,6 +5,7 @@ import Modal from "../../shared/Modal";
 import PageHeader from "../../shared/PageHeader";
 import Table from "../../shared/Table";
 import { AddButton, ActionButtons } from "../../shared/Button";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 import {
   useCreateEventMutation,
   useDeleteEventMutation,
@@ -28,6 +29,8 @@ const Event = () => {
     event_date: "",
     pdf_url: "",
   });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,8 +60,14 @@ const Event = () => {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete this event?")) await deleteEvent(id);
+  const handleDelete = async () => {
+    try {
+      await deleteEvent(deleteId).unwrap();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (isLoading) return (
@@ -145,7 +154,7 @@ const Event = () => {
           actions={(row) => (
             <ActionButtons
               onEdit={() => handleEdit(row)}
-              onDelete={() => handleDelete(row.id)}
+              onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
             />
           )}
         />
@@ -167,7 +176,7 @@ const Event = () => {
               </div>
               <ActionButtons
                 onEdit={() => handleEdit(event)}
-                onDelete={() => handleDelete(event.id)}
+                onDelete={() => { setDeleteId(event.id); setConfirmOpen(true); }}
               />
             </div>
             <div className="flex items-start gap-3">
@@ -272,6 +281,14 @@ const Event = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDelete}
+        title="Delete Event?"
+        message="Are you sure you want to delete this event? This action cannot be undone."
+      />
     </div>
   );
 };

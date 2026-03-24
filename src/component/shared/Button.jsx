@@ -52,7 +52,7 @@ export const AddButton = ({
 }) => (
   <Button
     onClick={onClick}
-    icon={Plus}
+    // icon={Plus}
     isLoading={isLoading}
     className="shadow-blue-200"
   >

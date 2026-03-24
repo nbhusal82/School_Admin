@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText,
   FolderOpen,
@@ -10,6 +11,7 @@ import {
 import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton } from "../../shared/Button";
+import ConfirmDialog from "../../shared/ConfirmDialog";
 
 import {
   useDeleteNoticeMutation,
@@ -24,6 +26,7 @@ import {
 } from "../../redux/feature/category";
 
 const NoticeManagement = () => {
+  const navigate = useNavigate();
   const { data: notices, isLoading } = useGetNoticeQuery();
   const { data: categories = [] } = useGetcategory_noticeQuery();
   const [deleteNotice] = useDeleteNoticeMutation();
@@ -49,6 +52,9 @@ const NoticeManagement = () => {
   const [categoryModal, setCategoryModal] = useState(false);
   const [categoryName, setCategoryName] = useState("");
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
   // Notice Handlers
   const handleNoticeSubmit = async (e) => {
     e.preventDefault();
@@ -73,13 +79,13 @@ const NoticeManagement = () => {
     }
   };
 
-  const handleDeleteNotice = async (id) => {
-    if (window.confirm("Delete this notice?")) {
-      try {
-        await deleteNotice(id).unwrap();
-      } catch (err) {
-        console.error(err);
-      }
+  const handleDeleteNotice = async () => {
+    try {
+      await deleteNotice(deleteId).unwrap();
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -133,7 +139,7 @@ const NoticeManagement = () => {
     <div className="p-6 bg-gray-50 min-h-screen font-sans">
       <PageHeader title="Notices" subtitle="School Dashboard">
         <button
-          onClick={() => openCategoryModal()}
+          onClick={() => navigate("/admin/notice/category")}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
           <FolderOpen size={16} /> Manage Categories
@@ -212,7 +218,7 @@ const NoticeManagement = () => {
                     </a>
                   )}
                   <button
-                    onClick={() => handleDeleteNotice(notice.id)}
+                    onClick={() => { setDeleteId(notice.id); setConfirmOpen(true); }}
                     className="p-2.5 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all"
                   >
                     <Trash2 size={20} />
@@ -353,6 +359,14 @@ const NoticeManagement = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onConfirm={handleDeleteNotice}
+        title="Delete Notice?"
+        message="Are you sure you want to delete this notice? This action cannot be undone."
+      />
     </div>
   );
 };
