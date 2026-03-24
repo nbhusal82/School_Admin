@@ -17,7 +17,7 @@ import {
   useCreateNoticeMutation,
 } from "../../redux/feature/content";
 
-import { 
+import {
   useGetcategory_noticeQuery,
   useCreatecategory_noticeMutation,
   useDeletecategory_noticeMutation,
@@ -29,7 +29,8 @@ const NoticeManagement = () => {
   const [deleteNotice] = useDeleteNoticeMutation();
   const [createNotice, { isLoading: isCreating }] = useCreateNoticeMutation();
 
-  const [createCategory, { isLoading: isCreatingCat }] = useCreatecategory_noticeMutation();
+  const [createCategory, { isLoading: isCreatingCat }] =
+    useCreatecategory_noticeMutation();
   const [deleteCategory] = useDeletecategory_noticeMutation();
 
   const imageurl = import.meta.env.VITE_IMAGE_URL;
@@ -55,7 +56,8 @@ const NoticeManagement = () => {
     formData.append("title", noticeForm.title);
     formData.append("category_id", noticeForm.category_id);
     formData.append("notice_date", noticeForm.notice_date);
-    if (noticeForm.attachment) formData.append("attachment", noticeForm.attachment);
+    if (noticeForm.attachment)
+      formData.append("attachment", noticeForm.attachment);
 
     try {
       await createNotice(formData).unwrap();
@@ -103,7 +105,10 @@ const NoticeManagement = () => {
         <PageHeader title="Notices" subtitle="Loading notices..." />
         <div className="grid gap-4 max-w-5xl">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="bg-white p-5 rounded-4xl border border-gray-100 shadow-sm animate-pulse">
+            <div
+              key={i}
+              className="bg-white p-5 rounded-4xl border border-gray-100 shadow-sm animate-pulse"
+            >
               <div className="flex items-start gap-4">
                 <div className="hidden sm:flex h-12 w-12 bg-gray-300 rounded-2xl"></div>
                 <div className="flex-1 space-y-2">
@@ -140,7 +145,11 @@ const NoticeManagement = () => {
       <div className="flex gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
         <button
           onClick={() => setFilter("All")}
-          className={`px-5 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${filter === "All" ? "bg-gray-900 text-white border-gray-900 shadow-md" : "bg-white text-gray-500 border-gray-100 hover:border-blue-300"}`}
+          className={`px-5 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
+            filter === "All"
+              ? "bg-blue-600 text-white shadow-lg shadow-blue-100"
+              : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+          }`}
         >
           All Notices
         </button>
@@ -148,7 +157,11 @@ const NoticeManagement = () => {
           <button
             key={cat.category_id}
             onClick={() => setFilter(cat.category_id)}
-            className={`px-5 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${String(filter) === String(cat.category_id) ? "bg-gray-900 text-white border-gray-900 shadow-md" : "bg-white text-gray-500 border-gray-100 hover:border-blue-300"}`}
+            className={`px-5 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
+              String(filter) === String(cat.category_id)
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-100"
+                : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+            }`}
           >
             {cat.category_name}
           </button>
@@ -226,10 +239,14 @@ const NoticeManagement = () => {
       >
         <form onSubmit={handleNoticeSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Title</label>
+            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
+              Title
+            </label>
             <input
               value={noticeForm.title}
-              onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })}
+              onChange={(e) =>
+                setNoticeForm({ ...noticeForm, title: e.target.value })
+              }
               required
               placeholder="Title of the notice..."
               className="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
@@ -238,10 +255,14 @@ const NoticeManagement = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Category</label>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
+                Category
+              </label>
               <select
                 value={noticeForm.category_id}
-                onChange={(e) => setNoticeForm({ ...noticeForm, category_id: e.target.value })}
+                onChange={(e) =>
+                  setNoticeForm({ ...noticeForm, category_id: e.target.value })
+                }
                 required
                 className="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -254,27 +275,39 @@ const NoticeManagement = () => {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Date</label>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
+                Date
+              </label>
               <input
                 type="date"
                 value={noticeForm.notice_date}
-                onChange={(e) => setNoticeForm({ ...noticeForm, notice_date: e.target.value })}
+                onChange={(e) =>
+                  setNoticeForm({ ...noticeForm, notice_date: e.target.value })
+                }
                 className="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Attachment</label>
+            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
+              Attachment
+            </label>
             <input
               type="file"
-              onChange={(e) => setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })}
+              onChange={(e) =>
+                setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })
+              }
               className="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={() => setNoticeModal(false)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setNoticeModal(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isCreating}>
@@ -307,7 +340,11 @@ const NoticeManagement = () => {
           </div>
 
           <div className="flex gap-2 pt-1">
-            <Button variant="outline" className="flex-1" onClick={() => setCategoryModal(false)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setCategoryModal(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isCreatingCat}>

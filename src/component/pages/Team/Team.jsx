@@ -170,10 +170,9 @@ const Team = () => {
         title="Team Members"
         subtitle={`Managing ${teamMembers.length} staff members`}
       >
-        {/* ✅ Manage Categories navigate to separate page */}
         <button
-          onClick={() => navigate("/admin/team/category")}
-          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-50 transition active:scale-95 mr-2"
+          onClick={() => openCategoryModal()}
+          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
           <FolderOpen size={16} /> Manage Categories
         </button>
@@ -196,15 +195,12 @@ const Team = () => {
               : "bg-gray-50 text-gray-400 hover:bg-gray-100"
           }`}
         >
-          All Members ({teamMembers.length})
+          All Members
         </button>
 
         {categories.map((cat) => {
           const catId = cat.category_id || cat.id;
           const catName = cat.category_name || cat.name;
-          const count = teamMembers.filter(
-            (m) => String(m.category_id) === String(catId),
-          ).length;
 
           return (
             <button
@@ -217,9 +213,7 @@ const Team = () => {
               }`}
             >
               {catName}{" "}
-              <span className="ml-1.5 opacity-60 text-[10px] font-medium italic">
-                ({count})
-              </span>
+              <span className="ml-1.5 opacity-60 text-[10px] font-medium italic"></span>
             </button>
           );
         })}

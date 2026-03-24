@@ -1,19 +1,26 @@
 import React, { useState } from "react";
-import { Plus, Trash2, X, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import TableSkeleton from "../../shared/Skeleton_table";
+import Modal from "../../shared/Modal";
+import PageHeader from "../../shared/PageHeader";
+import Table from "../../shared/Table";
+import { AddButton, ActionButtons } from "../../shared/Button";
 import {
   useCreateEventMutation,
   useDeleteEventMutation,
   useGetEventQuery,
+  useUpdateEventMutation,
 } from "../../redux/feature/academic";
 
 const Event = () => {
   const { data: events = [], isLoading } = useGetEventQuery();
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
+  const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
   const imageurl = import.meta.env.VITE_IMAGE_URL;
 
   const [modal, setModal] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
     title: "",
     category: "",
@@ -24,8 +31,23 @@ const Event = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createEvent(form).unwrap();
+    if (editMode) {
+      await updateEvent({ id: form.id, data: form }).unwrap();
+    } else {
+      await createEvent(form).unwrap();
+    }
+    handleCloseModal();
+  };
+
+  const handleEdit = (event) => {
+    setForm(event);
+    setEditMode(true);
+    setModal(true);
+  };
+
+  const handleCloseModal = () => {
     setModal(false);
+    setEditMode(false);
     setForm({
       title: "",
       category: "",
@@ -41,12 +63,7 @@ const Event = () => {
 
   if (isLoading) return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Events Management</h1>
-          <p className="text-xs text-gray-500 italic">Manage school events</p>
-        </div>
-      </div>
+      <PageHeader title="Events Management" subtitle="Manage school events" />
       <div className="hidden lg:block">
         <TableSkeleton rows={5} columns={7} />
       </div>
@@ -64,86 +81,80 @@ const Event = () => {
     </div>
   );
 
+  const columns = [
+    {
+      header: "S.N",
+      accessor: "id",
+      render: (row, index) => <span className="text-gray-400">{index + 1}</span>,
+    },
+    {
+      header: "Title",
+      accessor: "title",
+      render: (row) => <span className="font-medium text-gray-700">{row.title}</span>,
+    },
+    {
+      header: "Category",
+      accessor: "category",
+      render: (row) => (
+        <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
+          {row.category}
+        </span>
+      ),
+    },
+    {
+      header: "Description",
+      accessor: "description",
+      render: (row) => (
+        <span className="text-gray-500 max-w-xs truncate block">{row.description}</span>
+      ),
+    },
+    {
+      header: "Date",
+      accessor: "event_date",
+      render: (row) => (
+        <div className="flex items-center gap-1 text-gray-500">
+          <Calendar size={13} className="text-gray-400" />
+          {new Date(row.event_date).toLocaleDateString()}
+        </div>
+      ),
+    },
+    {
+      header: "Image",
+      accessor: "pdf_url",
+      render: (row) => (
+        <img
+          src={`${imageurl}/${row.pdf_url}`}
+          alt="event"
+          className="w-12 h-9 object-cover rounded"
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-gray-800">
-            Events Management
-          </h1>
-          <p className="text-xs text-gray-500 italic">Manage school events</p>
-        </div>
-        <button
-          onClick={() => setModal(true)}
-          className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-xs sm:text-sm shadow-sm min-h-11 self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          <span className="hidden sm:inline">Add Event</span>
-          <span className="sm:hidden">Add</span>
-        </button>
+      <PageHeader title="Events Management" subtitle="Manage school events">
+        <AddButton onClick={() => setModal(true)} label="Add Event" />
+      </PageHeader>
+
+      {/* DESKTOP TABLE */}
+      <div className="hidden lg:block">
+        <Table
+          columns={columns}
+          data={events}
+          actions={(row) => (
+            <ActionButtons
+              onEdit={() => handleEdit(row)}
+              onDelete={() => handleDelete(row.id)}
+            />
+          )}
+        />
       </div>
 
-      {/* DESKTOP TABLE - Hidden on mobile */}
-      <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden border">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 border-b text-gray-600 font-medium">
-            <tr>
-              <th className="p-3">S.N</th>
-              <th className="p-3">Title</th>
-              <th className="p-3">Category</th>
-              <th className="p-3">Description</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Image</th>
-              <th className="p-3 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {events.map((event, index) => (
-              <tr key={event.id} className="hover:bg-gray-50 transition">
-                <td className="p-3 text-gray-400">{index + 1}</td>
-                <td className="p-3 font-medium text-gray-700">{event.title}</td>
-                <td className="p-3">
-                  <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
-                    {event.category}
-                  </span>
-                </td>
-                <td className="p-3 text-gray-500 max-w-xs truncate">
-                  {event.description}
-                </td>
-                <td className="p-3 text-gray-500 flex items-center gap-1">
-                  <Calendar size={13} className="text-gray-400" />
-                  {new Date(event.event_date).toLocaleDateString()}
-                </td>
-                <td className="p-3">
-                  <img
-                    src={`${imageurl}/${event.pdf_url}`}
-                    alt="event"
-                    className="w-12 h-9 object-cover rounded"
-                  />
-                </td>
-                <td className="p-3">
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => handleDelete(event.id)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* MOBILE CARDS - Visible only on mobile/tablet */}
+      {/* MOBILE CARDS */}
       <div className="lg:hidden space-y-3">
         {events.map((event, index) => (
-          <div
-            key={event.id}
-            className="bg-white rounded-xl shadow-sm border p-4"
-          >
+          <div key={event.id} className="bg-white rounded-xl shadow-sm border p-4">
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -152,19 +163,13 @@ const Event = () => {
                     {event.category}
                   </span>
                 </div>
-                <h3 className="font-medium text-gray-700 mb-1">
-                  {event.title}
-                </h3>
+                <h3 className="font-medium text-gray-700 mb-1">{event.title}</h3>
               </div>
-
-              <button
-                onClick={() => handleDelete(event.id)}
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition min-h-11 min-w-11 flex items-center justify-center"
-              >
-                <Trash2 size={16} />
-              </button>
+              <ActionButtons
+                onEdit={() => handleEdit(event)}
+                onDelete={() => handleDelete(event.id)}
+              />
             </div>
-
             <div className="flex items-start gap-3">
               <img
                 src={`${imageurl}/${event.pdf_url}`}
@@ -185,115 +190,88 @@ const Event = () => {
         ))}
       </div>
 
-      {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setModal(false)}
-          ></div>
-          <div className="relative bg-white w-full max-w-sm sm:max-w-md rounded-xl shadow-2xl p-4 sm:p-5 animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-gray-800 text-base sm:text-lg">
-                Add Event
-              </h2>
-              <button
-                onClick={() => setModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-lg min-h-11 min-w-11 flex items-center justify-center"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Title
-                </label>
-                <input
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Event title"
-                  className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                    Category
-                  </label>
-                  <input
-                    required
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm({ ...form, category: e.target.value })
-                    }
-                    placeholder="Category"
-                    className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={form.event_date}
-                    onChange={(e) =>
-                      setForm({ ...form, event_date: e.target.value })
-                    }
-                    className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Description
-                </label>
-                <textarea
-                  required
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
-                  placeholder="Event description..."
-                  className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-20 resize-none"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                  Image URL
-                </label>
-                <input
-                  required
-                  value={form.pdf_url}
-                  onChange={(e) =>
-                    setForm({ ...form, pdf_url: e.target.value })
-                  }
-                  placeholder="Image URL"
-                  className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-                />
-              </div>
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setModal(false)}
-                  className="flex-1 py-3 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50 min-h-11"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm min-h-11 flex items-center justify-center gap-2"
-                >
-                  {isCreating ? "Adding..." : "Save Event"}
-                </button>
-              </div>
-            </form>
+      <Modal isOpen={modal} onClose={handleCloseModal} title={editMode ? "Edit Event" : "Add Event"}>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Title
+            </label>
+            <input
+              required
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="Event title"
+              className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
+            />
           </div>
-        </div>
-      )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                Category
+              </label>
+              <input
+                required
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                placeholder="Category"
+                className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+                Date
+              </label>
+              <input
+                type="date"
+                required
+                value={form.event_date}
+                onChange={(e) => setForm({ ...form, event_date: e.target.value })}
+                className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Description
+            </label>
+            <textarea
+              required
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Event description..."
+              className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-20 resize-none"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
+              Image URL
+            </label>
+            <input
+              required
+              value={form.pdf_url}
+              onChange={(e) => setForm({ ...form, pdf_url: e.target.value })}
+              placeholder="Image URL"
+              className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
+            />
+          </div>
+          <div className="flex gap-2 pt-3">
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="flex-1 py-3 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50 min-h-11"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isCreating || isUpdating}
+              className="flex-1 bg-blue-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm min-h-11 flex items-center justify-center gap-2"
+            >
+              {isCreating || isUpdating ? (editMode ? "Updating..." : "Adding...") : (editMode ? "Update Event" : "Save Event")}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

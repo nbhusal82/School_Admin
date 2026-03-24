@@ -14,10 +14,12 @@ const Button = ({
   ...props
 }) => {
   const variants = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg",
+    primary:
+      "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg",
     secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700",
     danger: "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg",
-    outline: "border-2 border-gray-300 hover:bg-gray-50 text-gray-700 hover:border-gray-400",
+    outline:
+      "border-2 border-gray-300 hover:bg-gray-50 text-gray-700 hover:border-gray-400",
   };
 
   const sizes = {
@@ -48,7 +50,12 @@ export const AddButton = ({
   label = "Add New",
   isLoading = false,
 }) => (
-  <Button onClick={onClick} icon={Plus} isLoading={isLoading} className="shadow-blue-200">
+  <Button
+    onClick={onClick}
+    icon={Plus}
+    isLoading={isLoading}
+    className="shadow-blue-200"
+  >
     {isLoading ? "Adding..." : label}
   </Button>
 );
@@ -86,7 +93,7 @@ export const ConfirmDialog = ({
 }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-100 p-4 animate-in fade-in duration-200">
       <div className="bg-white p-8 rounded-2xl w-full max-w-md text-center shadow-2xl animate-in zoom-in-95 duration-200">
         <div
           className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLoading ? "bg-gray-100" : "bg-red-50 text-red-500"}`}

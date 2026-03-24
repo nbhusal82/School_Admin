@@ -150,7 +150,7 @@ const [showScrollTop, setShowScrollTop] = useState(false);
             <Bell size={20} className="text-slate-300" />
           </div>
           <div className="space-y-3">
-            {statsData?.data?.recentActivities?.map((activity, idx) => (
+            {statsData?.data?.recentActivities?.slice(0, 10).map((activity, idx) => (
               <div
                 key={idx}
                 className="flex items-center gap-4 p-4 rounded-2xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all group"
