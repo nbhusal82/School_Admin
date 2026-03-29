@@ -5,6 +5,7 @@ import Modal from "../../shared/Modal";
 import Button, { ActionButtons, AddButton } from "../../shared/Button";
 import Table from "../../shared/Table";
 import ConfirmDialog from "../../shared/ConfirmDialog";
+import { FormInput, FormSelect, FormTextarea, FormImageUpload } from "../../shared/FormInput";
 
 import {
   useDelete_blogsMutation,
@@ -126,18 +127,17 @@ const BlogManagement = () => {
     },
   ];
 
-  // Loading
   if (isLoading)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <TableSkeleton rows={5} columns={4} />
       </div>
     );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-800">Blog Management</h1>
           <p className="text-gray-500 text-xs">
@@ -148,9 +148,9 @@ const BlogManagement = () => {
         <div className="flex gap-2">
           <button
             onClick={() => navigate("/admin/blog/category")}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
           >
-            <FolderOpen size={16} /> Manage Categories
+            <FolderOpen size={16} /> Categories
           </button>
 
           <AddButton onClick={openAdd} label="Add Blog" />
@@ -178,58 +178,55 @@ const BlogManagement = () => {
         title={editingBlog ? "Edit Blog" : "Add Blog"}
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
-          <input
-            required
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Blog Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title..."
-            className="w-full border p-2 rounded-lg"
+            placeholder="Enter blog title..."
+            required
           />
 
-          {/* Category + Date */}
-          <div className="grid grid-cols-2 gap-3">
-            <select
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormSelect
+              label="Category"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="border p-2 rounded-lg"
+              options={categories.map(c => ({ value: c.category_id, label: c.category_name }))}
+              placeholder="Select Category"
               required
-            >
-              <option value="">Select Category</option>
-              {categories.map((c) => (
-                <option key={c.category_id} value={c.category_id}>
-                  {c.category_name}
-                </option>
-              ))}
-            </select>
+            />
 
-            <input
+            <FormInput
+              label="Published Date"
               type="date"
               value={publishedDate}
               onChange={(e) => setPublishedDate(e.target.value)}
-              className="border p-2 rounded-lg"
               required
             />
           </div>
 
-          {/* Description */}
-          <textarea
+          <FormTextarea
+            label="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description..."
-            className="w-full border p-2 rounded-lg h-24"
+            placeholder="Write blog description..."
+            rows={4}
             required
           />
 
-          {/* Image */}
-          <input
-            type="file"
-            onChange={(e) => setImageFile(e.target.files[0])}
+          <FormImageUpload
+            label="Blog Image"
+            image={imageFile}
+            onImageChange={(e) => setImageFile(e.target.files[0])}
+            onImageRemove={() => setImageFile(null)}
+            existingImageUrl={editingBlog?.image_url ? `${imgurl}/${editingBlog.image_url}` : null}
+            previewShape="rounded-xl"
+            previewSize="w-24 h-24"
+            hint="PNG, JPG up to 5MB"
           />
 
-          {/* Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button
               variant="outline"
               className="flex-1"
@@ -243,7 +240,7 @@ const BlogManagement = () => {
               className="flex-1"
               isLoading={creating || updating}
             >
-              {editingBlog ? "Update" : "Save"}
+              {editingBlog ? "Update" : "Publish"}
             </Button>
           </div>
         </form>

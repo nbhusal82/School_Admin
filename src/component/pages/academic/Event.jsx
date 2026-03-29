@@ -7,6 +7,11 @@ import Table from "../../shared/Table";
 import { AddButton, ActionButtons } from "../../shared/Button";
 import ConfirmDialog from "../../shared/ConfirmDialog";
 import {
+  FormInput,
+  FormTextarea,
+  FormImageUpload,
+} from "../../shared/FormInput";
+import {
   useCreateEventMutation,
   useDeleteEventMutation,
   useGetEventQuery,
@@ -28,22 +33,34 @@ const Event = () => {
     description: "",
     event_date: "",
     pdf_url: "",
+    image: null,
   });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("category", form.category);
+    formData.append("description", form.description);
+    formData.append("event_date", form.event_date);
+    if (form.image) {
+      formData.append("image", form.image);
+    } else if (form.pdf_url) {
+      formData.append("pdf_url", form.pdf_url);
+    }
+
     if (editMode) {
-      await updateEvent({ id: form.id, data: form }).unwrap();
+      await updateEvent({ id: form.id, data: formData }).unwrap();
     } else {
-      await createEvent(form).unwrap();
+      await createEvent(formData).unwrap();
     }
     handleCloseModal();
   };
 
   const handleEdit = (event) => {
-    setForm(event);
+    setForm({ ...event, image: null });
     setEditMode(true);
     setModal(true);
   };
@@ -57,6 +74,7 @@ const Event = () => {
       description: "",
       event_date: "",
       pdf_url: "",
+      image: null,
     });
   };
 
@@ -70,36 +88,44 @@ const Event = () => {
     }
   };
 
-  if (isLoading) return (
-    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
-      <PageHeader title="Events Management" subtitle="Manage school events" />
-      <div className="hidden lg:block">
-        <TableSkeleton rows={5} columns={7} />
-      </div>
-      <div className="lg:hidden space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border p-4 animate-pulse">
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-12 bg-gray-300 rounded"></div>
+  if (isLoading)
+    return (
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
+        <PageHeader title="Events Management" subtitle="Manage school events" />
+        <div className="hidden lg:block">
+          <TableSkeleton rows={5} columns={7} />
+        </div>
+        <div className="lg:hidden space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl shadow-sm border p-4 animate-pulse"
+            >
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-12 bg-gray-300 rounded"></div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
 
   const columns = [
     {
       header: "S.N",
       accessor: "id",
-      render: (row, index) => <span className="text-gray-400">{index + 1}</span>,
+      render: (row, index) => (
+        <span className="text-gray-400">{index + 1}</span>
+      ),
     },
     {
       header: "Title",
       accessor: "title",
-      render: (row) => <span className="font-medium text-gray-700">{row.title}</span>,
+      render: (row) => (
+        <span className="font-medium text-gray-700">{row.title}</span>
+      ),
     },
     {
       header: "Category",
@@ -114,7 +140,9 @@ const Event = () => {
       header: "Description",
       accessor: "description",
       render: (row) => (
-        <span className="text-gray-500 max-w-xs truncate block">{row.description}</span>
+        <span className="text-gray-500 max-w-xs truncate block">
+          {row.description}
+        </span>
       ),
     },
     {
@@ -154,7 +182,10 @@ const Event = () => {
           actions={(row) => (
             <ActionButtons
               onEdit={() => handleEdit(row)}
-              onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
+              onDelete={() => {
+                setDeleteId(row.id);
+                setConfirmOpen(true);
+              }}
             />
           )}
         />
@@ -163,7 +194,10 @@ const Event = () => {
       {/* MOBILE CARDS */}
       <div className="lg:hidden space-y-3">
         {events.map((event, index) => (
-          <div key={event.id} className="bg-white rounded-xl shadow-sm border p-4">
+          <div
+            key={event.id}
+            className="bg-white rounded-xl shadow-sm border p-4"
+          >
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -172,11 +206,16 @@ const Event = () => {
                     {event.category}
                   </span>
                 </div>
-                <h3 className="font-medium text-gray-700 mb-1">{event.title}</h3>
+                <h3 className="font-medium text-gray-700 mb-1">
+                  {event.title}
+                </h3>
               </div>
               <ActionButtons
                 onEdit={() => handleEdit(event)}
-                onDelete={() => { setDeleteId(event.id); setConfirmOpen(true); }}
+                onDelete={() => {
+                  setDeleteId(event.id);
+                  setConfirmOpen(true);
+                }}
               />
             </div>
             <div className="flex items-start gap-3">
@@ -199,84 +238,82 @@ const Event = () => {
         ))}
       </div>
 
-      <Modal isOpen={modal} onClose={handleCloseModal} title={editMode ? "Edit Event" : "Add Event"}>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Title
-            </label>
-            <input
+      <Modal
+        isOpen={modal}
+        onClose={handleCloseModal}
+        title={editMode ? "Edit Event" : "Add Event"}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Event Title"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="Enter event title"
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormInput
+              label="Category"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              placeholder="e.g. Sports, Cultural"
               required
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Event title"
-              className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
+            />
+
+            <FormInput
+              label="Event Date"
+              type="date"
+              value={form.event_date}
+              onChange={(e) => setForm({ ...form, event_date: e.target.value })}
+              required
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                Category
-              </label>
-              <input
-                required
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                placeholder="Category"
-                className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                Date
-              </label>
-              <input
-                type="date"
-                required
-                value={form.event_date}
-                onChange={(e) => setForm({ ...form, event_date: e.target.value })}
-                className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Description
-            </label>
-            <textarea
-              required
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Event description..."
-              className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-20 resize-none"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Image URL
-            </label>
-            <input
-              required
-              value={form.pdf_url}
-              onChange={(e) => setForm({ ...form, pdf_url: e.target.value })}
-              placeholder="Image URL"
-              className="w-full border border-gray-200 px-3 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-11"
-            />
-          </div>
-          <div className="flex gap-2 pt-3">
+
+          <FormTextarea
+            label="Description"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="Write event description..."
+            rows={4}
+            required
+          />
+
+          <FormImageUpload
+            label="Event Image"
+            image={form.image}
+            onImageChange={(e) =>
+              setForm({ ...form, image: e.target.files[0] })
+            }
+            onImageRemove={() => setForm({ ...form, image: null })}
+            existingImageUrl={
+              editMode && form.pdf_url ? `${imageurl}/${form.pdf_url}` : null
+            }
+            previewShape="rounded-xl"
+            previewSize="w-24 h-24"
+            hint="PNG, JPG up to 5MB"
+          />
+
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <button
               type="button"
               onClick={handleCloseModal}
-              className="flex-1 py-3 text-sm font-medium text-gray-500 border rounded-lg hover:bg-gray-50 min-h-11"
+              className="flex-1 py-2.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isCreating || isUpdating}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm min-h-11 flex items-center justify-center gap-2"
+              className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 shadow-sm transition-all disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              {isCreating || isUpdating ? (editMode ? "Updating..." : "Adding...") : (editMode ? "Update Event" : "Save Event")}
+              {isCreating || isUpdating
+                ? editMode
+                  ? "Updating..."
+                  : "Adding..."
+                : editMode
+                  ? "Update"
+                  : "Save"}
             </button>
           </div>
         </form>
@@ -284,7 +321,10 @@ const Event = () => {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
         onConfirm={handleDelete}
         title="Delete Event?"
         message="Are you sure you want to delete this event? This action cannot be undone."

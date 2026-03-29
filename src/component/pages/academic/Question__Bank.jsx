@@ -5,6 +5,7 @@ import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import TableSkeleton from "../../shared/Skeleton_table";
 import ConfirmDialog from "../../shared/ConfirmDialog";
+import { FormInput, FormTextarea, FormFileUpload } from "../../shared/FormInput";
 import {
   useCreatequestion_bankMutation,
   useDeletequestion_bankMutation,
@@ -132,7 +133,7 @@ const QuestionBankAdmin = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <PageHeader
           title="Question Bank"
           subtitle="Manage question papers and resources"
@@ -142,7 +143,7 @@ const QuestionBankAdmin = () => {
     );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader
         title="Question Bank"
         subtitle="Manage question papers and resources"
@@ -167,84 +168,60 @@ const QuestionBankAdmin = () => {
         title={editing ? "Edit Question" : "Add Question"}
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Title
-            </label>
-            <input
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Question Title"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="Enter question title"
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <FormInput
+              label="Subject"
+              value={form.subject}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              placeholder="e.g. Math"
               required
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Question title"
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                Subject
-              </label>
-              <input
-                required
-                value={form.subject}
-                onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                placeholder="e.g. Math"
-                className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                Class
-              </label>
-              <input
-                required
-                value={form.class_level}
-                onChange={(e) =>
-                  setForm({ ...form, class_level: e.target.value })
-                }
-                placeholder="e.g. 10"
-                className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-                Year
-              </label>
-              <input
-                required
-                value={form.year}
-                onChange={(e) => setForm({ ...form, year: e.target.value })}
-                placeholder="e.g. 2024"
-                className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Description
-            </label>
-            <textarea
+
+            <FormInput
+              label="Class Level"
+              value={form.class_level}
+              onChange={(e) => setForm({ ...form, class_level: e.target.value })}
+              placeholder="e.g. 10"
               required
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-              placeholder="Description..."
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm h-20 resize-none"
+            />
+
+            <FormInput
+              label="Year"
+              value={form.year}
+              onChange={(e) => setForm({ ...form, year: e.target.value })}
+              placeholder="e.g. 2024"
+              required
             />
           </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              File (PDF)
-            </label>
-            <input
-              type="file"
-              onChange={(e) => setForm({ ...form, file: e.target.files[0] })}
-              className="w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700"
-            />
-          </div>
-          <div className="flex gap-2 pt-3">
+
+          <FormTextarea
+            label="Description"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="Write description..."
+            rows={3}
+            required
+          />
+
+          <FormFileUpload
+            label="Question File (PDF)"
+            file={form.file}
+            onFileChange={(e) => setForm({ ...form, file: e.target.files[0] })}
+            onFileRemove={() => setForm({ ...form, file: null })}
+            accept=".pdf"
+            hint="PDF up to 10MB"
+          />
+
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button
               variant="outline"
               className="flex-1"
@@ -257,7 +234,7 @@ const QuestionBankAdmin = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editing ? "Update Question" : "Save Question"}
+              {editing ? "Update" : "Save"}
             </Button>
           </div>
         </form>

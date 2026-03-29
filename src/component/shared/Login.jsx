@@ -37,38 +37,38 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f3f4f6] p-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-[#f3f4f6] p-3 sm:p-4 font-sans">
       {/* Small Compact Card */}
-      <div className="bg-white w-full max-w-90 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
+      <div className="bg-white w-full max-w-90 p-5 sm:p-6 md:p-8 rounded-2xl shadow-xl border border-gray-100">
         {/* --- LOGO SECTION (Smaller) --- */}
-        <div className="text-center mb-6">
-          <div className="relative w-16 h-16 mx-auto mb-3">
+        <div className="text-center mb-5 sm:mb-6">
+          <div className="relative w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-3">
             <img
               src={logoImg}
               alt="Logo"
               className="w-full h-full object-cover rounded-full border-2 border-blue-50 shadow-sm"
             />
           </div>
-          <h1 className="text-xl font-extrabold text-gray-800 tracking-tight uppercase">
+          <h1 className="text-lg sm:text-xl font-extrabold text-gray-800 tracking-tight uppercase">
             Namuna Vidhya <span className="text-blue-600">Sadan</span>
           </h1>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+          <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
             Admin Login
           </p>
         </div>
 
         {/* --- COMPACT FORM --- */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           {/* Email */}
           <div className="relative group">
             <Mail
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500"
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 sm:w-4 sm:h-4"
             />
             <input
               type="email"
               placeholder="Email Address"
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
@@ -78,13 +78,13 @@ const AdminLogin = () => {
           {/* Password */}
           <div className="relative group">
             <Lock
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500"
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 sm:w-4 sm:h-4"
             />
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
+              className="w-full pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
@@ -94,7 +94,7 @@ const AdminLogin = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={15} className="sm:w-4 sm:h-4" /> : <Eye size={15} className="sm:w-4 sm:h-4" />}
             </button>
           </div>
 
@@ -108,14 +108,14 @@ const AdminLogin = () => {
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
             ) : (
               <>
-                <ShieldCheck size={16} />
+                <ShieldCheck size={15} className="sm:w-4 sm:h-4" />
                 <span>Login</span>
               </>
             )}
           </button>
         </form>
 
-        <p className="text-[9px] text-gray-400 text-center mt-6 uppercase tracking-tighter">
+        <p className="text-[8px] sm:text-[9px] text-gray-400 text-center mt-5 sm:mt-6 uppercase tracking-tighter">
           © 2026 Namuna Bidhya School
         </p>
       </div>

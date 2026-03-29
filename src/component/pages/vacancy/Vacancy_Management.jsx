@@ -7,6 +7,7 @@ import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import TableSkeleton from "../../shared/Skeleton_table";
 import ConfirmDialog from "../../shared/ConfirmDialog";
+import { FormInput, FormTextarea, FormSelect } from "../../shared/FormInput";
 
 import {
   useCreatevacancyMutation,
@@ -21,6 +22,16 @@ import {
   useUpdatecategory_vacancyMutation,
   useDeletecategory_vacancyMutation,
 } from "../../redux/feature/category";
+
+// 🔥 Utility to format date
+const formatDate = (date) => {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 const VacancyManagement = () => {
   const navigate = useNavigate();
@@ -159,8 +170,10 @@ const VacancyManagement = () => {
     }
   };
 
+  // ✅ Updated Columns with formatted date
   const columns = [
     { header: "Title", accessor: "title", cellClassName: "font-medium" },
+
     {
       header: "Category",
       render: (row) =>
@@ -168,12 +181,19 @@ const VacancyManagement = () => {
           (c) => String(c.category_id) === String(row.category_id),
         )?.category_name || "N/A",
     },
+
     {
       header: "Deadline",
-      accessor: "application_deadline",
+      render: (row) => formatDate(row.application_deadline),
       cellClassName: "text-center",
     },
-    { header: "Posted", accessor: "posted_date", cellClassName: "text-center" },
+
+    {
+      header: "Posted",
+      render: (row) => formatDate(row.posted_date),
+      cellClassName: "text-center",
+    },
+
     {
       header: "Status",
       render: (row) => (
@@ -199,7 +219,7 @@ const VacancyManagement = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <PageHeader
           title="Vacancy Management"
           subtitle="Manage job vacancies"
@@ -209,13 +229,13 @@ const VacancyManagement = () => {
     );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader title="Vacancy Management" subtitle="Manage job vacancies">
         <button
           onClick={() => navigate("/admin/vacancy/category")}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
-          <FolderOpen size={16} /> Manage Categories
+          <FolderOpen size={16} /> Categories
         </button>
         <AddButton onClick={() => openVacancyModal()} label="Add Vacancy" />
       </PageHeader>
@@ -226,7 +246,10 @@ const VacancyManagement = () => {
         actions={(row) => (
           <ActionButtons
             onEdit={() => openVacancyModal(row)}
-            onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
+            onDelete={() => {
+              setDeleteId(row.id);
+              setConfirmOpen(true);
+            }}
           />
         )}
       />
@@ -238,96 +261,56 @@ const VacancyManagement = () => {
         title={editingVacancy ? "Update Vacancy" : "Add Vacancy"}
         size="md"
       >
-        <form onSubmit={handleVacancySubmit} className="space-y-3">
-          <div>
-            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
-              Title
-            </label>
-            <input
-              value={vacancyForm.title}
-              onChange={(e) =>
-                setVacancyForm({ ...vacancyForm, title: e.target.value })
-              }
-              placeholder="Vacancy title"
-              className="w-full border p-2 rounded-lg text-sm"
+        <form onSubmit={handleVacancySubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Vacancy Title"
+            value={vacancyForm.title}
+            onChange={(e) => setVacancyForm({ ...vacancyForm, title: e.target.value })}
+            placeholder="Enter vacancy title"
+            required
+          />
+
+          <FormTextarea
+            label="Job Description"
+            value={vacancyForm.description}
+            onChange={(e) => setVacancyForm({ ...vacancyForm, description: e.target.value })}
+            placeholder="Write job description..."
+            rows={3}
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormSelect
+              label="Category"
+              value={vacancyForm.category_id}
+              onChange={(e) => setVacancyForm({ ...vacancyForm, category_id: e.target.value })}
+              options={categories.map(c => ({ value: c.category_id, label: c.category_name }))}
+              placeholder="Select Category"
               required
+            />
+
+            <FormSelect
+              label="Status"
+              value={vacancyForm.status}
+              onChange={(e) => setVacancyForm({ ...vacancyForm, status: e.target.value })}
+              options={[
+                { value: "open", label: "Open" },
+                { value: "closed", label: "Closed" },
+                { value: "pending", label: "Pending" }
+              ]}
+              placeholder="Select Status"
             />
           </div>
 
-          <div>
-            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
-              Description
-            </label>
-            <textarea
-              value={vacancyForm.description}
-              onChange={(e) =>
-                setVacancyForm({ ...vacancyForm, description: e.target.value })
-              }
-              placeholder="Job description"
-              className="w-full border p-2 rounded-lg text-sm h-20 resize-none"
-              required
-            />
-          </div>
+          <FormInput
+            label="Application Deadline"
+            type="date"
+            value={vacancyForm.deadline}
+            onChange={(e) => setVacancyForm({ ...vacancyForm, deadline: e.target.value })}
+            required
+          />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
-                Category
-              </label>
-              <select
-                value={vacancyForm.category_id}
-                onChange={(e) =>
-                  setVacancyForm({
-                    ...vacancyForm,
-                    category_id: e.target.value,
-                  })
-                }
-                className="w-full border p-2 rounded-lg text-sm"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((c) => (
-                  <option key={c.category_id} value={c.category_id}>
-                    {c.category_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
-                Status
-              </label>
-              <select
-                value={vacancyForm.status}
-                onChange={(e) =>
-                  setVacancyForm({ ...vacancyForm, status: e.target.value })
-                }
-                className="w-full border p-2 rounded-lg text-sm"
-              >
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-bold block mb-1 text-gray-400 uppercase">
-              Application Deadline
-            </label>
-            <input
-              type="date"
-              value={vacancyForm.deadline}
-              onChange={(e) =>
-                setVacancyForm({ ...vacancyForm, deadline: e.target.value })
-              }
-              className="w-full border p-2 rounded-lg text-sm"
-              required
-            />
-          </div>
-
-          <div className="flex gap-2 pt-3">
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button
               variant="outline"
               className="flex-1"
@@ -340,7 +323,7 @@ const VacancyManagement = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingVacancy ? "Update Vacancy" : "Save Vacancy"}
+              {editingVacancy ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -387,9 +370,13 @@ const VacancyManagement = () => {
         </form>
       </Modal>
 
+      {/* CONFIRM DIALOG */}
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
         onConfirm={handleDeleteVacancy}
         title="Delete Vacancy?"
         message="Are you sure you want to delete this vacancy? This action cannot be undone."

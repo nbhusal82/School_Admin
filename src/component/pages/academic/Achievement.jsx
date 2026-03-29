@@ -4,6 +4,7 @@ import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import ConfirmDialog from "../../shared/ConfirmDialog";
+import { FormInput, FormTextarea, FormImageUpload } from "../../shared/FormInput";
 import {
   useCreateachievementMutation,
   useDeleteachievementMutation,
@@ -81,7 +82,7 @@ const Achievement = () => {
 
   if (isFetching)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <PageHeader title="School Achievements" subtitle="Showcase awards and milestones" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -99,7 +100,7 @@ const Achievement = () => {
     );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader title="School Achievements" subtitle="Showcase awards and milestones">
         <AddButton onClick={openAddModal} label="Add New" />
       </PageHeader>
@@ -126,55 +127,50 @@ const Achievement = () => {
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingAch ? "Edit Achievement" : "Add New Achievement"} size="md">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Achievement Title</label>
-            <input
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Achievement Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            placeholder="e.g. Best School Award 2024"
+            required
+          />
+
+          <FormTextarea
+            label="Description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Write a brief detail..."
+            rows={3}
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormInput
+              label="Achievement Date"
+              type="date"
+              value={formData.achievement_date}
+              onChange={(e) => setFormData({ ...formData, achievement_date: e.target.value })}
               required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full border p-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. Best School Award 2024"
+            />
+
+            <FormImageUpload
+              label="Upload Image"
+              image={formData.image}
+              onImageChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+              onImageRemove={() => setFormData({ ...formData, image: null })}
+              existingImageUrl={editingAch?.image_urls ? `${imgurl}/${editingAch.image_urls}` : null}
+              previewShape="rounded-xl"
+              previewSize="w-20 h-20"
+              hint="PNG, JPG up to 2MB"
             />
           </div>
-          <div>
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Description</label>
-            <textarea
-              rows="3"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full border p-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Write a brief detail..."
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</label>
-              <input
-                type="date"
-                required
-                value={formData.achievement_date}
-                onChange={(e) => setFormData({ ...formData, achievement_date: e.target.value })}
-                className="w-full border p-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Upload Image</label>
-              <label className="flex items-center justify-center border-2 border-dashed h-9.5 rounded-xl cursor-pointer hover:bg-gray-50 transition border-gray-200">
-                <ImageIcon size={16} className="text-gray-400 mr-2" />
-                <span className="text-[10px] text-gray-500 truncate px-1">
-                  {formData.image ? formData.image.name : "Choose File"}
-                </span>
-                <input type="file" className="hidden" onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })} />
-              </label>
-            </div>
-          </div>
-          <div className="flex gap-2 pt-4">
+
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button variant="outline" className="flex-1" onClick={() => setModalOpen(false)} disabled={isCreating || isUpdating}>
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isCreating || isUpdating}>
-              Save Achievement
+              {editingAch ? "Update" : "Save"}
             </Button>
           </div>
         </form>

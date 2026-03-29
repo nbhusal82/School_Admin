@@ -8,6 +8,7 @@ import Button, {
   ConfirmDialog,
 } from "../shared/Button";
 import TableSkeleton from "../shared/Skeleton_table";
+import { FormInput, FormTextarea, FormImageUpload } from "../shared/FormInput";
 import {
   useCreateReviewMutation,
   useDeleteReviewMutation,
@@ -121,7 +122,7 @@ const Review = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <PageHeader
           title="Review Management"
           subtitle="Manage customer reviews"
@@ -131,7 +132,7 @@ const Review = () => {
     );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader title="Review Management" subtitle="Manage customer reviews">
         <AddButton onClick={openAddModal} label="Add Review" />
       </PageHeader>
@@ -154,65 +155,44 @@ const Review = () => {
         title={editingReview ? "Edit Review" : "Add Review"}
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Name
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-              placeholder="Reviewer name"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Position
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.position}
-              onChange={(e) =>
-                setFormData({ ...formData, position: e.target.value })
-              }
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-              placeholder="e.g. Parent, Student"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Review
-            </label>
-            <textarea
-              required
-              value={formData.review_text}
-              onChange={(e) =>
-                setFormData({ ...formData, review_text: e.target.value })
-              }
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24 resize-none"
-              placeholder="Review text..."
-            />
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">
-              Photo
-            </label>
-            <input
-              type="file"
-              onChange={(e) =>
-                setFormData({ ...formData, image: e.target.files[0] })
-              }
-              className="w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Reviewer Name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Enter reviewer name"
+            required
+          />
 
-          <div className="flex gap-2 pt-3">
+          <FormInput
+            label="Position/Role"
+            value={formData.position}
+            onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+            placeholder="e.g. Parent, Student"
+            required
+          />
+
+          <FormTextarea
+            label="Review Text"
+            value={formData.review_text}
+            onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
+            placeholder="Write the review..."
+            rows={4}
+            required
+          />
+
+          <FormImageUpload
+            label="Profile Photo"
+            image={formData.image}
+            onImageChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+            onImageRemove={() => setFormData({ ...formData, image: null })}
+            existingImageUrl={editingReview?.image ? `${imgurl}/${editingReview.image}` : null}
+            previewShape="rounded-full"
+            previewSize="w-20 h-20"
+            hint="PNG, JPG up to 2MB"
+          />
+
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button
               variant="outline"
               className="flex-1"
@@ -225,7 +205,7 @@ const Review = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingReview ? "Update Review" : "Save Review"}
+              {editingReview ? "Update" : "Save"}
             </Button>
           </div>
         </form>

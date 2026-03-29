@@ -5,6 +5,7 @@ import Modal from "../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../shared/Button";
 import TableSkeleton from "../shared/Skeleton_table";
 import ConfirmDialog from "../shared/ConfirmDialog";
+import { FormInput, FormTextarea } from "../shared/FormInput";
 import {
   useGetFaqsQuery,
   useCreateFaqMutation,
@@ -65,14 +66,14 @@ const FAQPage = () => {
   };
 
   if (isLoading) return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader title="FAQ Management" subtitle="Manage frequently asked questions" />
       <TableSkeleton rows={5} columns={4} />
     </div>
   );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader title="FAQ Management" subtitle="Manage frequently asked questions">
         <AddButton onClick={openAddModal} label="Add FAQ" />
       </PageHeader>
@@ -94,33 +95,30 @@ const FAQPage = () => {
         title={editingFaq ? "Edit FAQ" : "Add FAQ"}
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Question</label>
-            <input
-              type="text" required
-              value={formData.question}
-              onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-              placeholder="Enter question"
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Answer</label>
-            <textarea
-              required
-              value={formData.answer}
-              onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-              placeholder="Enter answer"
-              className="w-full border border-gray-200 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24 resize-none"
-            />
-          </div>
-          <div className="flex gap-2 pt-3">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Question"
+            value={formData.question}
+            onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+            placeholder="Enter your question..."
+            required
+          />
+
+          <FormTextarea
+            label="Answer"
+            value={formData.answer}
+            onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
+            placeholder="Write the answer..."
+            rows={4}
+            required
+          />
+
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button variant="outline" className="flex-1" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isCreating || isUpdating}>
-              {editingFaq ? "Update FAQ" : "Save FAQ"}
+              {editingFaq ? "Update" : "Save"}
             </Button>
           </div>
         </form>

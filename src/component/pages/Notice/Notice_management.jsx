@@ -12,6 +12,7 @@ import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton } from "../../shared/Button";
 import ConfirmDialog from "../../shared/ConfirmDialog";
+import { FormInput, FormSelect, FormFileUpload } from "../../shared/FormInput";
 
 import {
   useDeleteNoticeMutation,
@@ -107,7 +108,7 @@ const NoticeManagement = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <PageHeader title="Notices" subtitle="Loading notices..." />
         <div className="grid gap-4 max-w-5xl">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -136,13 +137,13 @@ const NoticeManagement = () => {
         );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen font-sans">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen font-sans">
       <PageHeader title="Notices" subtitle="School Dashboard">
         <button
           onClick={() => navigate("/admin/notice/category")}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
-          <FolderOpen size={16} /> Manage Categories
+          <FolderOpen size={16} /> Categories
         </button>
         <AddButton onClick={() => setNoticeModal(true)} label="New Notice" />
       </PageHeader>
@@ -243,72 +244,43 @@ const NoticeManagement = () => {
         title="Add New Notice"
         size="md"
       >
-        <form onSubmit={handleNoticeSubmit} className="space-y-4">
-          <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-              Title
-            </label>
-            <input
-              value={noticeForm.title}
-              onChange={(e) =>
-                setNoticeForm({ ...noticeForm, title: e.target.value })
-              }
+        <form onSubmit={handleNoticeSubmit} className="space-y-4 sm:space-y-5">
+          <FormInput
+            label="Notice Title"
+            value={noticeForm.title}
+            onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })}
+            placeholder="Enter notice title..."
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormSelect
+              label="Category"
+              value={noticeForm.category_id}
+              onChange={(e) => setNoticeForm({ ...noticeForm, category_id: e.target.value })}
+              options={categories.map(cat => ({ value: cat.category_id, label: cat.category_name }))}
+              placeholder="Select Category"
               required
-              placeholder="Title of the notice..."
-              className="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+
+            <FormInput
+              label="Notice Date"
+              type="date"
+              value={noticeForm.notice_date}
+              onChange={(e) => setNoticeForm({ ...noticeForm, notice_date: e.target.value })}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-                Category
-              </label>
-              <select
-                value={noticeForm.category_id}
-                onChange={(e) =>
-                  setNoticeForm({ ...noticeForm, category_id: e.target.value })
-                }
-                required
-                className="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select</option>
-                {categories.map((cat) => (
-                  <option key={cat.category_id} value={cat.category_id}>
-                    {cat.category_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-                Date
-              </label>
-              <input
-                type="date"
-                value={noticeForm.notice_date}
-                onChange={(e) =>
-                  setNoticeForm({ ...noticeForm, notice_date: e.target.value })
-                }
-                className="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
+          <FormFileUpload
+            label="Attachment (PDF/Image)"
+            file={noticeForm.attachment}
+            onFileChange={(e) => setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })}
+            onFileRemove={() => setNoticeForm({ ...noticeForm, attachment: null })}
+            accept=".pdf,.jpg,.jpeg,.png"
+            hint="PDF, PNG, JPG up to 10MB"
+          />
 
-          <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-              Attachment
-            </label>
-            <input
-              type="file"
-              onChange={(e) =>
-                setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })
-              }
-              className="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-          </div>
-
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button
               variant="outline"
               className="flex-1"
@@ -317,7 +289,7 @@ const NoticeManagement = () => {
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isCreating}>
-              Publish Notice
+              Publish
             </Button>
           </div>
         </form>
@@ -330,22 +302,16 @@ const NoticeManagement = () => {
         title="Add Category"
         size="sm"
       >
-        <form onSubmit={handleCategorySubmit} className="space-y-3">
-          <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-              Category Name
-            </label>
-            <input
-              autoFocus
-              required
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="e.g. Academic"
-              className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          </div>
+        <form onSubmit={handleCategorySubmit} className="space-y-4">
+          <FormInput
+            label="Category Name"
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+            placeholder="e.g. Academic"
+            required
+          />
 
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 sm:gap-3 pt-1">
             <Button
               variant="outline"
               className="flex-1"

@@ -10,6 +10,7 @@ import PageHeader from "../../shared/PageHeader";
 import Modal from "../../shared/Modal";
 import Button, { AddButton } from "../../shared/Button";
 import ConfirmDialog from "../../shared/ConfirmDialog";
+import { FormSelect, FormTextarea } from "../../shared/FormInput";
 import {
   useCreategalleryMutation,
   useDeletegalleryMutation,
@@ -135,7 +136,7 @@ const Gallery = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
         <PageHeader title="Gallery" subtitle="Loading gallery items..." />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -156,7 +157,7 @@ const Gallery = () => {
     );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
       <PageHeader
         title="Gallery"
         subtitle={`Showing ${filteredGallery.length} items`}
@@ -165,7 +166,7 @@ const Gallery = () => {
           onClick={() => navigate("/admin/gallery/category")}
           className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
         >
-          <FolderOpen size={16} /> Manage Categories
+          <FolderOpen size={16} /> Categories
         </button>
         <AddButton onClick={() => openGalleryModal()} label="Add New" />
       </PageHeader>
@@ -275,57 +276,39 @@ const Gallery = () => {
         title={editingGallery ? "Update Gallery" : "Add Gallery"}
         size="md"
       >
-        <form onSubmit={handleGallerySubmit} className="space-y-4">
-          <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-              Category
-            </label>
-            <select
-              required
-              className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              value={galleryForm.category_id}
-              onChange={(e) =>
-                setGalleryForm({ ...galleryForm, category_id: e.target.value })
-              }
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.category_name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <form onSubmit={handleGallerySubmit} className="space-y-4 sm:space-y-5">
+          <FormSelect
+            label="Category"
+            value={galleryForm.category_id}
+            onChange={(e) => setGalleryForm({ ...galleryForm, category_id: e.target.value })}
+            options={categories.map(cat => ({ value: cat.id, label: cat.category_name }))}
+            placeholder="Select Category"
+            required
+          />
+
+          <FormTextarea
+            label="Caption"
+            value={galleryForm.caption}
+            onChange={(e) => setGalleryForm({ ...galleryForm, caption: e.target.value })}
+            placeholder="Write description..."
+            rows={3}
+          />
 
           <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-              Caption
-            </label>
-            <textarea
-              placeholder="Description..."
-              className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
-              value={galleryForm.caption}
-              onChange={(e) =>
-                setGalleryForm({ ...galleryForm, caption: e.target.value })
-              }
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-gray-400 uppercase block mb-1">
-              Images
+            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">
+              Upload Images (Multiple)
             </label>
             <input
               type="file"
               multiple
-              onChange={(e) =>
-                setGalleryForm({ ...galleryForm, images: e.target.files })
-              }
-              className="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              accept="image/*"
+              onChange={(e) => setGalleryForm({ ...galleryForm, images: e.target.files })}
+              className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition-all"
             />
+            <p className="text-[10px] text-gray-400 mt-1.5 ml-1">PNG, JPG - Multiple files allowed</p>
           </div>
 
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-2 sm:gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
