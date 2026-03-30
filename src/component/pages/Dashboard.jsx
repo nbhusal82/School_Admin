@@ -26,7 +26,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data: statsData, isLoading } = useGetDashboardStatsQuery();
-  const [logout] = useLogoutMutation();
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [dynamicStats, setDynamicStats] = useState([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -97,9 +97,12 @@ const [showScrollTop, setShowScrollTop] = useState(false);
           ${showLogout ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}
         `}
       >
-        <LogOut size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden sm:inline">Sign Out</span>
-        <span className="sm:hidden">Out</span>
+        {isLoggingOut ? (
+          <div className="w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <LogOut size={14} className="sm:w-4 sm:h-4" />
+        )}
+        <span>{isLoggingOut ? "Signing Out..." : "Sign Out"}</span>
       </button>
 
       {/* --- SCROLL TO TOP --- */}
@@ -200,6 +203,7 @@ const [showScrollTop, setShowScrollTop] = useState(false);
         onConfirm={handleLogout}
         title="Logout?"
         message="Are you sure you want to logout from the admin panel?"
+        isLoading={isLoggingOut}
       />
     </div>
   );

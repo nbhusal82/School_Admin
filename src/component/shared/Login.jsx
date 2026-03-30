@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useLoginMutation } from "../redux/feature/authslice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../redux/feature/authState";
 import logoImg from "../../assets/image/logo.jpg";
 import ErrorToast from "./ErrorToast";
@@ -11,6 +11,9 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
+
+  const isAuth = useSelector((state) => state.user.isAuth);
+  if (isAuth) return <Navigate to="/admin/dashboard" replace />;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -94,7 +97,11 @@ const AdminLogin = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
             >
-              {showPassword ? <EyeOff size={15} className="sm:w-4 sm:h-4" /> : <Eye size={15} className="sm:w-4 sm:h-4" />}
+              {showPassword ? (
+                <EyeOff size={15} className="sm:w-4 sm:h-4" />
+              ) : (
+                <Eye size={15} className="sm:w-4 sm:h-4" />
+              )}
             </button>
           </div>
 
