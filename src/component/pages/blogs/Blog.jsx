@@ -5,7 +5,7 @@ import Modal from "../../shared/Modal";
 import Button, { ActionButtons, AddButton } from "../../shared/Button";
 import Table from "../../shared/Table";
 import ConfirmDialog from "../../shared/ConfirmDialog";
-import { FormInput, FormSelect, FormTextarea, FormImageUpload } from "../../shared/FormInput";
+import { FormInput, FormSelect, FormImageUpload } from "../../shared/FormInput";
 
 import {
   useDelete_blogsMutation,
@@ -16,6 +16,7 @@ import {
 
 import { useGetblog_categoryQuery } from "../../redux/feature/category";
 import { FolderOpen } from "lucide-react";
+import RichTextEditor from "../../shared/LargerTextArea";
 
 const BlogManagement = () => {
   const navigate = useNavigate();
@@ -114,8 +115,13 @@ const BlogManagement = () => {
       ),
     },
     {
-      header: "Title",
-      accessor: "title",
+      header: "Description",
+      render: (row) => (
+        <div
+          className="text-gray-500 text-xs max-w-xs line-clamp-2"
+          dangerouslySetInnerHTML={{ __html: row.description }}
+        />
+      ),
     },
     {
       header: "Category",
@@ -165,7 +171,10 @@ const BlogManagement = () => {
           actions={(row) => (
             <ActionButtons
               onEdit={() => handleEdit(row)}
-              onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
+              onDelete={() => {
+                setDeleteId(row.id);
+                setConfirmOpen(true);
+              }}
             />
           )}
         />
@@ -176,7 +185,7 @@ const BlogManagement = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingBlog ? "Edit Blog" : "Add Blog"}
-        size="md"
+        size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <FormInput
@@ -192,7 +201,10 @@ const BlogManagement = () => {
               label="Category"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              options={categories.map(c => ({ value: c.category_id, label: c.category_name }))}
+              options={categories.map((c) => ({
+                value: c.category_id,
+                label: c.category_name,
+              }))}
               placeholder="Select Category"
               required
             />
@@ -206,13 +218,10 @@ const BlogManagement = () => {
             />
           </div>
 
-          <FormTextarea
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+          <RichTextEditor
+            initialContent={description}
+            onChange={(val) => setDescription(val)}
             placeholder="Write blog description..."
-            rows={4}
-            required
           />
 
           <FormImageUpload
@@ -220,7 +229,11 @@ const BlogManagement = () => {
             image={imageFile}
             onImageChange={(e) => setImageFile(e.target.files[0])}
             onImageRemove={() => setImageFile(null)}
-            existingImageUrl={editingBlog?.image_url ? `${imgurl}/${editingBlog.image_url}` : null}
+            existingImageUrl={
+              editingBlog?.image_url
+                ? `${imgurl}/${editingBlog.image_url}`
+                : null
+            }
             previewShape="rounded-xl"
             previewSize="w-24 h-24"
             hint="PNG, JPG up to 5MB"
@@ -248,7 +261,10 @@ const BlogManagement = () => {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
         onConfirm={handleDeleteClick}
         title="Delete Blog?"
         message="Are you sure you want to delete this blog? This action cannot be undone."
