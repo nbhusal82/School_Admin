@@ -1,5 +1,5 @@
 import React from "react";
-import { LogOut } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import Button from "./Button";
 
 const ConfirmDialog = ({
@@ -9,25 +9,37 @@ const ConfirmDialog = ({
   title,
   message,
   isLoading,
+  variant = "delete", // "delete" | "logout"
 }) => {
   if (!isOpen) return null;
+
+  const isLogout = variant === "logout";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
         <div className="flex items-start gap-4">
-          {/* Icon change */}
-          <div className="shrink-0 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-            <LogOut className="text-blue-600" size={24} />
+          <div
+            className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: isLogout
+                ? "color-mix(in srgb, var(--color-secondary) 15%, white)"
+                : "#fee2e2",
+            }}
+          >
+            <Trash2
+              size={22}
+              style={{ color: isLogout ? "var(--color-secondary)" : "#ef4444" }}
+            />
           </div>
 
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {title || "Sign Out"}
+              {title || "Delete?"}
             </h3>
             <p className="text-gray-600 text-sm">
-              {message || "Are you sure you want to sign out?"}
+              {message || "Are you sure? This action cannot be undone."}
             </p>
           </div>
         </div>
@@ -41,14 +53,12 @@ const ConfirmDialog = ({
           >
             Cancel
           </Button>
-
-          {/* Blue button */}
           <Button
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className={`flex-1 text-white ${isLogout ? "bg-blue-600 hover:bg-blue-700" : "bg-red-500 hover:bg-red-600"}`}
             onClick={onConfirm}
             isLoading={isLoading}
           >
-            Sign Out
+            {isLoading ? (isLogout ? "Signing Out..." : "Deleting...") : (isLogout ? "Sign Out" : "Delete")}
           </Button>
         </div>
       </div>

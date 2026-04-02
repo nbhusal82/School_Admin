@@ -30,20 +30,17 @@ const Dashboard = () => {
   const [dynamicStats, setDynamicStats] = useState([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Handle logout
   const handleLogout = async () => {
     try {
       await logout().unwrap();
       dispatch(logoutAction());
       navigate("/");
     } catch (error) {
-      console.error("Logout failed:", error);
       dispatch(logoutAction());
       navigate("/");
     }
-    setConfirmOpen(false);
   };
-const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [showLogout, setShowLogout] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -93,8 +90,9 @@ const [showScrollTop, setShowScrollTop] = useState(false);
       {/* --- LOGOUT BUTTON (Scroll Sensitive) --- */}
       <button
         onClick={() => setConfirmOpen(true)}
-        className={`fixed top-4 sm:top-6 right-4 sm:right-6 z-50 flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-100 text-gray-700 hover:text-red-600 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md transition-all duration-500 font-bold text-xs sm:text-sm
-          ${showLogout ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}
+        disabled={isLoggingOut}
+        className={`fixed top-4 sm:top-6 right-4 sm:right-6 z-40 flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-100 text-gray-700 hover:text-red-600 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md transition-all duration-500 font-bold text-xs sm:text-sm
+          ${showLogout && !confirmOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20 pointer-events-none"}
         `}
       >
         {isLoggingOut ? (
@@ -155,37 +153,41 @@ const [showScrollTop, setShowScrollTop] = useState(false);
             <Bell size={18} className="text-slate-300 sm:w-5 sm:h-5" />
           </div>
           <div className="space-y-2 sm:space-y-3">
-            {statsData?.data?.recentActivities?.slice(0, 10).map((activity, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all group"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-[15px] text-slate-700 font-bold group-hover:text-blue-600 transition-colors truncate">
-                    {activity.title}
-                  </p>
-                  <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-1.5">
-                    <span className="text-[8px] sm:text-[9px] font-black uppercase bg-blue-600 text-white px-1.5 sm:px-2 py-0.5 rounded">
-                      {activity.category}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold tracking-tight truncate">
-                      {new Date(activity.created_at).toDateString()}
-                    </span>
+            {statsData?.data?.recentActivities
+              ?.slice(0, 10)
+              .map((activity, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-[15px] text-slate-700 font-bold group-hover:text-blue-600 transition-colors truncate">
+                      {activity.title}
+                    </p>
+                    <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-1.5">
+                      <span className="text-[8px] sm:text-[9px] font-black uppercase bg-blue-600 text-white px-1.5 sm:px-2 py-0.5 rounded">
+                        {activity.category}
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold tracking-tight truncate">
+                        {new Date(activity.created_at).toDateString()}
+                      </span>
+                    </div>
                   </div>
+                  <ChevronRight
+                    size={14}
+                    className="text-slate-300 group-hover:translate-x-1 transition-transform shrink-0 sm:w-4 sm:h-4"
+                  />
                 </div>
-                <ChevronRight
-                  size={14}
-                  className="text-slate-300 group-hover:translate-x-1 transition-transform shrink-0 sm:w-4 sm:h-4"
-                />
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
         {/* --- QUICK ACTIONS --- */}
         <div className="bg-slate-900 rounded-2xl sm:rounded-4xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
           <div className="relative z-10">
-            <h2 className="text-lg sm:text-xl font-black mb-4 sm:mb-6 tracking-wide">Actions</h2>
+            <h2 className="text-lg sm:text-xl font-black mb-4 sm:mb-6 tracking-wide">
+              Actions
+            </h2>
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
               <QuickBtn Icon={FileText} label="Post New Notice" />
               <QuickBtn Icon={Image} label="Update Gallery" />
@@ -204,6 +206,7 @@ const [showScrollTop, setShowScrollTop] = useState(false);
         title="Logout?"
         message="Are you sure you want to logout from the admin panel?"
         isLoading={isLoggingOut}
+        variant="logout"
       />
     </div>
   );
@@ -215,7 +218,9 @@ const QuickBtn = ({ Icon, label }) => (
       size={16}
       className="text-blue-400 group-hover:scale-110 transition-transform sm:w-4.5 sm:h-4.5 shrink-0"
     />
-    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-widest">{label}</span>
+    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-widest">
+      {label}
+    </span>
   </button>
 );
 
