@@ -19,7 +19,8 @@ import {
 } from "../../redux/feature/academic";
 
 const Event = () => {
-  const { data: events = [], isLoading } = useGetEventQuery();
+  const { data, isLoading } = useGetEventQuery();
+  const events = data?.data || [];
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
@@ -131,7 +132,14 @@ const Event = () => {
       header: "Category",
       accessor: "category",
       render: (row) => (
-        <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
+        <span
+          className="px-2 py-0.5 rounded-full text-xs"
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--color-secondary) 15%, white)",
+            color: "var(--color-secondary)",
+          }}
+        >
           {row.category}
         </span>
       ),
@@ -202,7 +210,14 @@ const Event = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs text-gray-400">#{index + 1}</span>
-                  <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
+                  <span
+                    className="px-2 py-0.5 rounded-full text-xs"
+                    style={{
+                      backgroundColor:
+                        "color-mix(in srgb, var(--color-secondary) 15%, white)",
+                      color: "var(--color-secondary)",
+                    }}
+                  >
                     {event.category}
                   </span>
                 </div>
@@ -305,7 +320,8 @@ const Event = () => {
             <button
               type="submit"
               disabled={isCreating || isUpdating}
-              className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 shadow-sm transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+              className="flex-1 text-white py-2.5 rounded-xl text-sm font-medium shadow-sm transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+              style={{ backgroundColor: "var(--color-secondary)" }}
             >
               {isCreating || isUpdating
                 ? editMode

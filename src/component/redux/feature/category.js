@@ -40,11 +40,7 @@ export const categoryApi = indexSlice.injectEndpoints({
         url: "/api/category/notice",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.category || [];
-      },
+  
       providesTags: ["category"],
     }),
     createcategory_notice: builder.mutation({
@@ -75,11 +71,7 @@ export const categoryApi = indexSlice.injectEndpoints({
         url: "/api/category/vacancy",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.category || [];
-      },
+      
       providesTags: ["category"],
     }),
     createcategory_vacancy: builder.mutation({
@@ -143,11 +135,7 @@ export const categoryApi = indexSlice.injectEndpoints({
         method: "GET",
         body: data,
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.category || response.categories || [];
-      },
+     
       providesTags: ["category"],
     }),
     create_team_category: builder.mutation({

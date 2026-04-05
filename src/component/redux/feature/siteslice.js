@@ -8,11 +8,7 @@ export const siteApi = indexSlice.injectEndpoints({
         url: `/api/site/reviews`,
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.reviews || [];
-      },
+    
       providesTags: ["site"],
     }),
     createReview: builder.mutation({
@@ -45,11 +41,7 @@ export const siteApi = indexSlice.injectEndpoints({
         url: "/api/site/faqs",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.faqs || [];
-      },
+     
       providesTags: ["site"],
     }),
     createFaq: builder.mutation({
@@ -82,11 +74,7 @@ export const siteApi = indexSlice.injectEndpoints({
         url: "/api/team",
         method: "GET",
       }),
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.team || [];
-      },
+      
       providesTags: ["site"],
     }),
     createTeam: builder.mutation({

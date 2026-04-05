@@ -8,11 +8,7 @@ export const academicApi = indexSlice.injectEndpoints({
         method: "GET",
       }),
 
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.event || [];
-      },
+     
       providesTags: ["academic"],
     }),
 
@@ -82,11 +78,7 @@ export const academicApi = indexSlice.injectEndpoints({
         method: "GET",
       }),
 
-      transformResponse: (response) => {
-        return Array.isArray(response)
-          ? response
-          : response.data || response.event || [];
-      },
+    
       providesTags: ["academic"],
     }),
 

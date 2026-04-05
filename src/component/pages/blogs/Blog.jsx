@@ -164,7 +164,7 @@ const BlogManagement = () => {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <Table
           columns={columns}
           data={blogs}
@@ -178,6 +178,31 @@ const BlogManagement = () => {
             />
           )}
         />
+      </div>
+
+      <div className="lg:hidden space-y-3">
+        {blogs.map((row, index) => (
+          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-start gap-3 flex-1">
+                <img
+                  src={row.image_url ? `${imgurl}/${row.image_url}` : "/placeholder.png"}
+                  className="w-14 h-10 object-cover rounded shrink-0"
+                  alt=""
+                />
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-700 line-clamp-1">{row.title}</p>
+                  <span className="text-xs text-gray-500">{categories.find((c) => String(c.category_id) === String(row.category_id))?.category_name || "N/A"}</span>
+                  <div className="text-xs text-gray-400 mt-1 line-clamp-2" dangerouslySetInnerHTML={{ __html: row.description }} />
+                </div>
+              </div>
+              <ActionButtons
+                onEdit={() => handleEdit(row)}
+                onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* MODAL */}

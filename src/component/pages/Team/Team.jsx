@@ -24,7 +24,8 @@ const Team = () => {
   const navigate = useNavigate();
 
   // 1. Data Fetching
-  const { data: teamMembers = [], isLoading } = useGetTeamQuery();
+  const { data: teamRes, isLoading } = useGetTeamQuery();
+  const teamMembers = teamRes?.data || teamRes || [];
   const { data: catRes } = useGet_team_categoryQuery();
   const categories = catRes?.data || catRes || [];
 
@@ -92,7 +93,7 @@ const Team = () => {
   // 4. Form Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const data = new FormData();
     data.append("name", formData.name);
     data.append("position", formData.position);
@@ -123,7 +124,10 @@ const Team = () => {
       });
     } catch (err) {
       console.error("Error saving team member:", err);
-      const errorMsg = err?.data?.message || err?.message || "Failed to save. Please try again.";
+      const errorMsg =
+        err?.data?.message ||
+        err?.message ||
+        "Failed to save. Please try again.";
       alert(`Error: ${errorMsg}`);
     }
   };
@@ -234,7 +238,7 @@ const Team = () => {
       </div>
 
       {/* DATA TABLE */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <Table
           columns={columns}
           data={filteredMembers}
@@ -245,6 +249,33 @@ const Team = () => {
             />
           )}
         />
+      </div>
+
+      <div className="lg:hidden space-y-3">
+        {filteredMembers.map((row) => (
+          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3 flex-1">
+                <img src={`${imgurl}/${row.image}`} className="w-12 h-12 rounded-full object-cover border shrink-0" alt={row.name} />
+                <div className="min-w-0">
+                  <p className="font-bold text-gray-700">{row.name}</p>
+                  <p className="text-xs text-gray-500">{row.position}</p>
+                  <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase">
+                    {categories.find((c) => String(c.category_id || c.id) === String(row.category_id))?.category_name || "Uncategorized"}
+                  </span>
+                </div>
+              </div>
+              <ActionButtons
+                onEdit={() => handleEdit(row)}
+                onDelete={() => handleDeleteClick(row.id)}
+              />
+            </div>
+            <div className="text-xs text-gray-500 mt-2 pl-15">
+              <p>{row.number || "No Phone"}</p>
+              <p>{row.email || "No Email"}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ADD/EDIT MODAL */}
@@ -281,7 +312,7 @@ const Team = () => {
               }
               options={[
                 { value: "teacher", label: "Teacher" },
-                { value: "committee", label: "Committee" }
+                { value: "committee", label: "Committee" },
               ]}
               placeholder="Select Role"
               required

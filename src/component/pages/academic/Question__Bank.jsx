@@ -5,7 +5,11 @@ import Modal from "../../shared/Modal";
 import Button, { AddButton, ActionButtons } from "../../shared/Button";
 import TableSkeleton from "../../shared/Skeleton_table";
 import ConfirmDialog from "../../shared/ConfirmDialog";
-import { FormInput, FormTextarea, FormFileUpload } from "../../shared/FormInput";
+import {
+  FormInput,
+  FormTextarea,
+  FormFileUpload,
+} from "../../shared/FormInput";
 import {
   useCreatequestion_bankMutation,
   useDeletequestion_bankMutation,
@@ -14,7 +18,8 @@ import {
 } from "../../redux/feature/academic";
 
 const QuestionBankAdmin = () => {
-  const { data: questions = [], isLoading } = useGetquestion_bankQuery();
+  const { data, isLoading } = useGetquestion_bankQuery();
+  const questions = data?.data || [];
   const [createQuestion, { isLoading: isCreating }] =
     useCreatequestion_bankMutation();
   const [updateQuestion, { isLoading: isUpdating }] =
@@ -151,16 +156,46 @@ const QuestionBankAdmin = () => {
         <AddButton onClick={() => openModal()} label="Add Question" />
       </PageHeader>
 
-      <Table
-        columns={columns}
-        data={questions}
-        actions={(row) => (
-          <ActionButtons
-            onEdit={() => openModal(row)}
-            onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
-          />
-        )}
-      />
+      <div className="hidden lg:block">
+        <Table
+          columns={columns}
+          data={questions}
+          actions={(row) => (
+            <ActionButtons
+              onEdit={() => openModal(row)}
+              onDelete={() => {
+                setDeleteId(row.id);
+                setConfirmOpen(true);
+              }}
+            />
+          )}
+        />
+      </div>
+
+      <div className="lg:hidden space-y-3">
+        {questions.map((row, index) => (
+          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1">
+                <span className="text-xs text-gray-400">#{index + 1}</span>
+                <h3 className="font-medium text-gray-700">{row.title}</h3>
+                <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-xs">{row.subject}</span>
+              </div>
+              <ActionButtons
+                onEdit={() => openModal(row)}
+                onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
+              />
+            </div>
+            <div className="flex gap-3 text-xs text-gray-500 mt-2">
+              <span>Class: {row.class_level}</span>
+              <span>Year: {row.year}</span>
+              {row.file_type === "pdf" && (
+                <a href={`${baseurl}/${row.file_url}`} target="_blank" className="text-blue-600 underline">View PDF</a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
 
       <Modal
         isOpen={modal}
@@ -189,7 +224,9 @@ const QuestionBankAdmin = () => {
             <FormInput
               label="Class Level"
               value={form.class_level}
-              onChange={(e) => setForm({ ...form, class_level: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, class_level: e.target.value })
+              }
               placeholder="e.g. 10"
               required
             />
@@ -242,7 +279,10 @@ const QuestionBankAdmin = () => {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
         onConfirm={handleDelete}
         title="Delete Question?"
         message="Are you sure you want to delete this question? This action cannot be undone."

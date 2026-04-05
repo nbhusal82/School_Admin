@@ -131,20 +131,39 @@ const GalleryCategory = () => {
       </PageHeader>
 
       <div className="max-w-4xl mx-auto">
-        <Table
-          columns={columns}
-          data={categories}
-          actions={(row) => (
-            <ActionButtons
-              onEdit={() => openModal(row)}
-              onDelete={() => {
-                setSelectedId(row.id);
-                setConfirmOpen(true);
-              }}
-            />
-          )}
-          emptyMessage='No categories found. Click "Add Category" to start.'
-        />
+        <div className="hidden lg:block">
+          <Table
+            columns={columns}
+            data={categories}
+            actions={(row) => (
+              <ActionButtons
+                onEdit={() => openModal(row)}
+                onDelete={() => {
+                  setSelectedId(row.id);
+                  setConfirmOpen(true);
+                }}
+              />
+            )}
+            emptyMessage='No categories found. Click "Add Category" to start.'
+          />
+        </div>
+        <div className="lg:hidden space-y-3">
+          {categories.map((row, index) => (
+            <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-md text-blue-500"><FolderOpen size={16} /></div>
+                <div>
+                  <span className="text-xs text-gray-400">#{index + 1}</span>
+                  <p className="font-medium text-gray-700">{row.category_name || row.name}</p>
+                </div>
+              </div>
+              <ActionButtons
+                onEdit={() => openModal(row)}
+                onDelete={() => { setSelectedId(row.id); setConfirmOpen(true); }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <Modal

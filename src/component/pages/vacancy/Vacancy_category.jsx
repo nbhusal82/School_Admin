@@ -16,7 +16,8 @@ import {
 
 const Vacancy_Category = () => {
   const navigate = useNavigate();
-  const { data: categories = [], isLoading } = useGet_vacancy_categoryQuery();
+ const { data, isLoading } = useGet_vacancy_categoryQuery();
+ const categories = data?.data || [];
   const [createCategory, { isLoading: isCreating }] =
     useCreatecategory_vacancyMutation();
   const [updateCategory, { isLoading: isUpdating }] =
@@ -120,21 +121,40 @@ const Vacancy_Category = () => {
       </PageHeader>
 
       <div className="max-w-4xl mx-auto">
-        <Table
-          columns={columns}
-          data={categories}
-          actions={(row) => (
-            <ActionButtons
-              onEdit={() => {
-                setEditingCategory(row);
-                setName(row.category_name);
-                setModalOpen(true);
-              }}
-              onDelete={() => { setDeleteId(row.category_id); setConfirmOpen(true); }}
-            />
-          )}
-          emptyMessage="No categories found"
-        />
+        <div className="hidden lg:block">
+          <Table
+            columns={columns}
+            data={categories}
+            actions={(row) => (
+              <ActionButtons
+                onEdit={() => {
+                  setEditingCategory(row);
+                  setName(row.category_name);
+                  setModalOpen(true);
+                }}
+                onDelete={() => {
+                  setDeleteId(row.category_id);
+                  setConfirmOpen(true);
+                }}
+              />
+            )}
+            emptyMessage="No categories found"
+          />
+        </div>
+        <div className="lg:hidden space-y-3">
+          {categories.map((row, index) => (
+            <div key={row.category_id} className="bg-white rounded-xl shadow-sm border p-4 flex justify-between items-center">
+              <div>
+                <span className="text-xs text-gray-400">#{index + 1}</span>
+                <p className="font-medium text-gray-700">{row.category_name}</p>
+              </div>
+              <ActionButtons
+                onEdit={() => { setEditingCategory(row); setName(row.category_name); setModalOpen(true); }}
+                onDelete={() => { setDeleteId(row.category_id); setConfirmOpen(true); }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <Modal
@@ -154,7 +174,7 @@ const Vacancy_Category = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Category name"
-            className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            className="w-full border border-gray-200 px-3 py-1.5 rounded-lg focus:ring-2 focus:ring-[var(--color-secondary)] outline-none text-sm"
           />
           <div className="flex gap-2 pt-1">
             <Button
@@ -178,7 +198,10 @@ const Vacancy_Category = () => {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
         onConfirm={handleDelete}
         title="Delete Category?"
         message="Are you sure you want to delete this category? This action cannot be undone."

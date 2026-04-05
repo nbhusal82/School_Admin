@@ -130,17 +130,33 @@ const TeamCategory = () => {
       </PageHeader>
 
       <div className="max-w-4xl mx-auto">
-        <Table
-          columns={columns}
-          data={categories}
-          actions={(row) => (
-            <ActionButtons
-              onEdit={() => handleEdit(row)}
-              onDelete={() => { setDeleteId(row.category_id || row.id); setConfirmOpen(true); }}
-            />
-          )}
-          emptyMessage="No Categories Found"
-        />
+        <div className="hidden lg:block">
+          <Table
+            columns={columns}
+            data={categories}
+            actions={(row) => (
+              <ActionButtons
+                onEdit={() => handleEdit(row)}
+                onDelete={() => { setDeleteId(row.category_id || row.id); setConfirmOpen(true); }}
+              />
+            )}
+            emptyMessage="No Categories Found"
+          />
+        </div>
+        <div className="lg:hidden space-y-3">
+          {categories.map((row, index) => (
+            <div key={row.category_id || row.id} className="bg-white rounded-xl shadow-sm border p-4 flex justify-between items-center">
+              <div>
+                <span className="text-xs text-gray-400">#{index + 1}</span>
+                <p className="font-bold text-gray-700">{row.category_name || row.name}</p>
+              </div>
+              <ActionButtons
+                onEdit={() => handleEdit(row)}
+                onDelete={() => { setDeleteId(row.category_id || row.id); setConfirmOpen(true); }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <Modal

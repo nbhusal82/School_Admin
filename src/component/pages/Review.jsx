@@ -17,7 +17,8 @@ import {
 } from "../redux/feature/siteslice";
 
 const Review = () => {
-  const { data: reviews = [], isLoading } = useGetreviewQuery();
+    const { data: reviewRes, isLoading } = useGetreviewQuery();
+    const reviews = reviewRes?.data || reviewRes || [];
   const [createReview, { isLoading: isCreating }] = useCreateReviewMutation();
   const [updateReview, { isLoading: isUpdating }] = useUpdateReviewMutation();
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
@@ -137,16 +138,39 @@ const Review = () => {
         <AddButton onClick={openAddModal} label="Add Review" />
       </PageHeader>
 
-      <Table
-        columns={columns}
-        data={reviews}
-        actions={(row) => (
-          <ActionButtons
-            onEdit={() => handleEdit(row)}
-            onDelete={() => handleDeleteClick(row.id)}
-          />
-        )}
-      />
+      <div className="hidden lg:block">
+        <Table
+          columns={columns}
+          data={reviews}
+          actions={(row) => (
+            <ActionButtons
+              onEdit={() => handleEdit(row)}
+              onDelete={() => handleDeleteClick(row.id)}
+            />
+          )}
+        />
+      </div>
+
+      <div className="lg:hidden space-y-3">
+        {reviews.map((row, index) => (
+          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3 flex-1">
+                <img src={`${imgurl}/${row.image}`} className="w-12 h-12 rounded-full object-cover border shrink-0" alt={row.name} />
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-800">{row.name}</p>
+                  <p className="text-xs text-gray-500">{row.position}</p>
+                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">{row.review_text}</p>
+                </div>
+              </div>
+              <ActionButtons
+                onEdit={() => handleEdit(row)}
+                onDelete={() => handleDeleteClick(row.id)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Add/Edit Modal */}
       <Modal

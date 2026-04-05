@@ -29,7 +29,8 @@ import {
 const NoticeManagement = () => {
   const navigate = useNavigate();
   const { data: notices, isLoading } = useGetNoticeQuery();
-  const { data: categories = [] } = useGetcategory_noticeQuery();
+  const { data: catRes } = useGetcategory_noticeQuery();
+  const categories = catRes?.data || catRes || [];
   const [deleteNotice] = useDeleteNoticeMutation();
   const [createNotice, { isLoading: isCreating }] = useCreateNoticeMutation();
 
@@ -219,7 +220,10 @@ const NoticeManagement = () => {
                     </a>
                   )}
                   <button
-                    onClick={() => { setDeleteId(notice.id); setConfirmOpen(true); }}
+                    onClick={() => {
+                      setDeleteId(notice.id);
+                      setConfirmOpen(true);
+                    }}
                     className="p-2.5 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all"
                   >
                     <Trash2 size={20} />
@@ -248,7 +252,9 @@ const NoticeManagement = () => {
           <FormInput
             label="Notice Title"
             value={noticeForm.title}
-            onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })}
+            onChange={(e) =>
+              setNoticeForm({ ...noticeForm, title: e.target.value })
+            }
             placeholder="Enter notice title..."
             required
           />
@@ -257,8 +263,13 @@ const NoticeManagement = () => {
             <FormSelect
               label="Category"
               value={noticeForm.category_id}
-              onChange={(e) => setNoticeForm({ ...noticeForm, category_id: e.target.value })}
-              options={categories.map(cat => ({ value: cat.category_id, label: cat.category_name }))}
+              onChange={(e) =>
+                setNoticeForm({ ...noticeForm, category_id: e.target.value })
+              }
+              options={categories.map((cat) => ({
+                value: cat.category_id,
+                label: cat.category_name,
+              }))}
               placeholder="Select Category"
               required
             />
@@ -267,15 +278,21 @@ const NoticeManagement = () => {
               label="Notice Date"
               type="date"
               value={noticeForm.notice_date}
-              onChange={(e) => setNoticeForm({ ...noticeForm, notice_date: e.target.value })}
+              onChange={(e) =>
+                setNoticeForm({ ...noticeForm, notice_date: e.target.value })
+              }
             />
           </div>
 
           <FormFileUpload
             label="Attachment (PDF/Image)"
             file={noticeForm.attachment}
-            onFileChange={(e) => setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })}
-            onFileRemove={() => setNoticeForm({ ...noticeForm, attachment: null })}
+            onFileChange={(e) =>
+              setNoticeForm({ ...noticeForm, attachment: e.target.files[0] })
+            }
+            onFileRemove={() =>
+              setNoticeForm({ ...noticeForm, attachment: null })
+            }
             accept=".pdf,.jpg,.jpeg,.png"
             hint="PDF, PNG, JPG up to 10MB"
           />
@@ -328,7 +345,10 @@ const NoticeManagement = () => {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => { setConfirmOpen(false); setDeleteId(null); }}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
         onConfirm={handleDeleteNotice}
         title="Delete Notice?"
         message="Are you sure you want to delete this notice? This action cannot be undone."

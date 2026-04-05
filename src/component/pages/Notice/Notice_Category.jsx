@@ -16,7 +16,8 @@ import {
 
 const Notice_Category = () => {
   const navigate = useNavigate();
-  const { data: categories = [], isLoading } = useGetcategory_noticeQuery();
+  const { data: catRes, isLoading } = useGetcategory_noticeQuery();
+  const categories = catRes?.data || catRes || [];
   const [createCategory, { isLoading: isCreating }] =
     useCreatecategory_noticeMutation();
   const [updateCategory, { isLoading: isUpdating }] =
@@ -117,24 +118,40 @@ const Notice_Category = () => {
       </PageHeader>
 
       <div className="max-w-4xl mx-auto">
-        <Table
-          columns={columns}
-          data={categories}
-          actions={(row) => (
-            <ActionButtons
-              onEdit={() => {
-                setEditingCategory(row);
-                setName(row.category_name);
-                setModalOpen(true);
-              }}
-              onDelete={() => {
-                setDeleteId(row.category_id);
-                setConfirmOpen(true);
-              }}
-            />
-          )}
-          emptyMessage="No categories found"
-        />
+        <div className="hidden lg:block">
+          <Table
+            columns={columns}
+            data={categories}
+            actions={(row) => (
+              <ActionButtons
+                onEdit={() => {
+                  setEditingCategory(row);
+                  setName(row.category_name);
+                  setModalOpen(true);
+                }}
+                onDelete={() => {
+                  setDeleteId(row.category_id);
+                  setConfirmOpen(true);
+                }}
+              />
+            )}
+            emptyMessage="No categories found"
+          />
+        </div>
+        <div className="lg:hidden space-y-3">
+          {categories.map((row, index) => (
+            <div key={row.category_id} className="bg-white rounded-xl shadow-sm border p-4 flex justify-between items-center">
+              <div>
+                <span className="text-xs text-gray-400">#{index + 1}</span>
+                <p className="font-medium text-gray-700">{row.category_name}</p>
+              </div>
+              <ActionButtons
+                onEdit={() => { setEditingCategory(row); setName(row.category_name); setModalOpen(true); }}
+                onDelete={() => { setDeleteId(row.category_id); setConfirmOpen(true); }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <Modal

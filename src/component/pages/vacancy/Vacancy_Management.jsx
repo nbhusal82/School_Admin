@@ -240,19 +240,53 @@ const VacancyManagement = () => {
         <AddButton onClick={() => openVacancyModal()} label="Add Vacancy" />
       </PageHeader>
 
-      <Table
-        columns={columns}
-        data={vacancyItems}
-        actions={(row) => (
-          <ActionButtons
-            onEdit={() => openVacancyModal(row)}
-            onDelete={() => {
-              setDeleteId(row.id);
-              setConfirmOpen(true);
-            }}
-          />
-        )}
-      />
+      <div className="hidden lg:block">
+        <Table
+          columns={columns}
+          data={vacancyItems}
+          actions={(row) => (
+            <ActionButtons
+              onEdit={() => openVacancyModal(row)}
+              onDelete={() => {
+                setDeleteId(row.id);
+                setConfirmOpen(true);
+              }}
+            />
+          )}
+        />
+      </div>
+
+      <div className="lg:hidden space-y-3">
+        {vacancyItems.map((row, index) => (
+          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1">
+                <span className="text-xs text-gray-400">#{index + 1}</span>
+                <h3 className="font-medium text-gray-700">{row.title}</h3>
+                <span className="text-xs text-gray-500">{categories.find((c) => String(c.category_id) === String(row.category_id))?.category_name || "N/A"}</span>
+              </div>
+              <ActionButtons
+                onEdit={() => openVacancyModal(row)}
+                onDelete={() => { setDeleteId(row.id); setConfirmOpen(true); }}
+              />
+            </div>
+            <div className="flex gap-4 text-xs text-gray-500 mt-2">
+              <span>Deadline: {formatDate(row.application_deadline)}</span>
+              <select
+                value={row.status}
+                onChange={(e) => handleStatusChange(row, e.target.value)}
+                className={`border rounded px-2 py-0.5 text-xs font-semibold ${
+                  row.status === "open" ? "text-green-600" : row.status === "closed" ? "text-red-600" : "text-yellow-600"
+                }`}
+              >
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* VACANCY MODAL */}
       <Modal
