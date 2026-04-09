@@ -30,7 +30,7 @@ const TeamCategory = () => {
     useCreate_team_categoryMutation();
   const [updateCat, { isLoading: isUpdating }] =
     useUpdate_team_categoryMutation();
-  const [deleteCat] = useDelete_team_categoryMutation();
+  const [deleteCat, { isLoading: isDeleting }] = useDelete_team_categoryMutation();
 
   // Local States
   const [modalOpen, setModalOpen] = useState(false);
@@ -197,7 +197,7 @@ const TeamCategory = () => {
               className="flex-2"
               isLoading={isCreating || isUpdating}
             >
-              {editingCat ? "Update Now" : "Create Dept"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingCat ? "Update Now" : "Create Dept"}
             </Button>
           </div>
         </form>
@@ -209,6 +209,7 @@ const TeamCategory = () => {
         onConfirm={handleDelete}
         title="Delete Category?"
         message="Are you sure? Members linked to this category might be affected."
+        isLoading={isDeleting}
       />
     </div>
   );

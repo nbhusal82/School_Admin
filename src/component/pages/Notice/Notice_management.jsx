@@ -31,7 +31,7 @@ const NoticeManagement = () => {
   const { data: notices, isLoading } = useGetNoticeQuery();
   const { data: catRes } = useGetcategory_noticeQuery();
   const categories = catRes?.data || catRes || [];
-  const [deleteNotice] = useDeleteNoticeMutation();
+  const [deleteNotice, { isLoading: isDeleting }] = useDeleteNoticeMutation();
   const [createNotice, { isLoading: isCreating }] = useCreateNoticeMutation();
 
   const [createCategory, { isLoading: isCreatingCat }] =
@@ -306,7 +306,7 @@ const NoticeManagement = () => {
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isCreating}>
-              Publish
+              {isCreating ? "Publishing..." : "Publish"}
             </Button>
           </div>
         </form>
@@ -352,6 +352,7 @@ const NoticeManagement = () => {
         onConfirm={handleDeleteNotice}
         title="Delete Notice?"
         message="Are you sure you want to delete this notice? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

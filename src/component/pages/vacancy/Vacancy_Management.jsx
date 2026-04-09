@@ -43,7 +43,7 @@ const VacancyManagement = () => {
 
   const [createVacancy, { isLoading: isCreating }] = useCreatevacancyMutation();
   const [updateVacancy, { isLoading: isUpdating }] = useUpdatevacancyMutation();
-  const [deleteVacancy] = useDeletevacancyMutation();
+  const [deleteVacancy, { isLoading: isDeleting }] = useDeletevacancyMutation();
 
   const [createCategory, { isLoading: isCreatingCat }] =
     useCreatecategory_vacancyMutation();
@@ -357,7 +357,7 @@ const VacancyManagement = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingVacancy ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingVacancy ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -398,7 +398,7 @@ const VacancyManagement = () => {
               className="flex-1"
               isLoading={isCreatingCat || isUpdatingCat}
             >
-              {editingCategory ? "Update" : "Save"}
+              {isCreatingCat ? "Saving..." : isUpdatingCat ? "Updating..." : editingCategory ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -414,6 +414,7 @@ const VacancyManagement = () => {
         onConfirm={handleDeleteVacancy}
         title="Delete Vacancy?"
         message="Are you sure you want to delete this vacancy? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

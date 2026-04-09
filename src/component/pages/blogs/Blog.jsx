@@ -30,7 +30,7 @@ const BlogManagement = () => {
   const categories = catRes?.data || [];
 
   // Mutations
-  const [deleteBlog] = useDelete_blogsMutation();
+  const [deleteBlog, { isLoading: isDeleting }] = useDelete_blogsMutation();
   const [createBlog, { isLoading: creating }] = useCreate_blogsMutation();
   const [updateBlog, { isLoading: updating }] = useUpdate_blogsMutation();
 
@@ -209,76 +209,82 @@ const BlogManagement = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingBlog ? "Edit Blog" : "Add Blog"}
-        size="lg"
+        title={editingBlog ? "Edit Blog" : "Create New Blog"}
+        size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          <FormInput
-            label="Blog Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter blog title..."
-            required
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormSelect
-              label="Category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              options={categories.map((c) => ({
-                value: c.category_id,
-                label: c.category_name,
-              }))}
-              placeholder="Select Category"
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="space-y-4">
+            <FormInput
+              label="Blog Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter a catchy blog title..."
               required
+              className="text-gray-800 font-medium"
             />
 
-            <FormInput
-              label="Published Date"
-              type="date"
-              value={publishedDate}
-              onChange={(e) => setPublishedDate(e.target.value)}
-              required
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
+              <FormSelect
+                label="Category"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                options={categories.map((c) => ({
+                  value: c.category_id,
+                  label: c.category_name,
+                }))}
+                required
+              />
+              <FormInput
+                label="Published Date"
+                type="date"
+                value={publishedDate}
+                onChange={(e) => setPublishedDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-gray-700 pl-1">
+              Blog Content
+            </label>
+            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all bg-white min-h-[200px]">
+              <RichTextEditor
+                initialContent={description}
+                onChange={(val) => setDescription(val)}
+                placeholder="Write your amazing blog description here..."
+              />
+            </div>
+          </div>
+
+          <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-100/50">
+            <FormImageUpload
+              label="Cover Image"
+              image={imageFile}
+              onImageChange={(e) => setImageFile(e.target.files[0])}
+              onImageRemove={() => setImageFile(null)}
+              existingImageUrl={editingBlog?.image_url ? `${imgurl}/${editingBlog.image_url}` : null}
+              previewShape="rounded-xl"
+              previewSize="w-full h-40 object-cover"
             />
           </div>
 
-          <RichTextEditor
-            initialContent={description}
-            onChange={(val) => setDescription(val)}
-            placeholder="Write blog description..."
-          />
-
-          <FormImageUpload
-            label="Blog Image"
-            image={imageFile}
-            onImageChange={(e) => setImageFile(e.target.files[0])}
-            onImageRemove={() => setImageFile(null)}
-            existingImageUrl={
-              editingBlog?.image_url
-                ? `${imgurl}/${editingBlog.image_url}`
-                : null
-            }
-            previewShape="rounded-xl"
-            previewSize="w-24 h-24"
-            hint="PNG, JPG up to 5MB"
-          />
-
-          <div className="flex gap-2 sm:gap-3 pt-2">
+          <div className="flex gap-3 pt-2">
             <Button
               variant="outline"
-              className="flex-1"
+              type="button"
               onClick={() => setIsModalOpen(false)}
+              className="flex-1"
+              disabled={creating || updating}
             >
-              Cancel
+              Cancel 
             </Button>
-
             <Button
               type="submit"
-              className="flex-1"
+              className="flex-1 shadow-md shadow-blue-500/20"
               isLoading={creating || updating}
             >
-              {editingBlog ? "Update" : "Publish"}
+              {creating ? "Publishing..." : updating ? "Updating..." : editingBlog ? "Update Blog" : "Publish Blog"}
             </Button>
           </div>
         </form>
@@ -293,6 +299,7 @@ const BlogManagement = () => {
         onConfirm={handleDeleteClick}
         title="Delete Blog?"
         message="Are you sure you want to delete this blog? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

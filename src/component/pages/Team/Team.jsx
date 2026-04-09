@@ -383,7 +383,7 @@ const Team = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingMember ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingMember ? "Update" : "Save"}
             </Button>
           </div>
         </form>

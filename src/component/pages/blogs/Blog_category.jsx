@@ -23,7 +23,7 @@ const BlogCategory = () => {
     useCreate_blogs_categoryMutation();
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdate_blogs_categoryMutation();
-  const [deleteCategory] = useDelete_blogs_categoryMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDelete_blogs_categoryMutation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
@@ -176,7 +176,7 @@ const BlogCategory = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingCat ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingCat ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -188,6 +188,7 @@ const BlogCategory = () => {
         onConfirm={handleDelete}
         title="Delete Category?"
         message="Are you sure you want to delete this category? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

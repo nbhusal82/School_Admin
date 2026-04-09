@@ -229,7 +229,7 @@ const Review = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingReview ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingReview ? "Update" : "Save"}
             </Button>
           </div>
         </form>

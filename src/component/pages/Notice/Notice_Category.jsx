@@ -22,7 +22,7 @@ const Notice_Category = () => {
     useCreatecategory_noticeMutation();
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdatecategory_noticeMutation();
-  const [deleteCategory] = useDeletecategory_noticeMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDeletecategory_noticeMutation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -187,7 +187,7 @@ const Notice_Category = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingCategory ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingCategory ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -202,6 +202,7 @@ const Notice_Category = () => {
         onConfirm={handleDelete}
         title="Delete Category?"
         message="Are you sure you want to delete this category? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

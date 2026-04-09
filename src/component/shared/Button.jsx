@@ -1,7 +1,8 @@
 import React from "react";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 
-// Base Button with Loading Support
+// 1. Base Button Component
+// यो सबै बटनहरूको जग हो जसले children, icons र loading state सम्हाल्छ।
 const Button = ({
   children,
   onClick,
@@ -14,12 +15,10 @@ const Button = ({
   ...props
 }) => {
   const variants = {
-    primary:
-      "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg",
+    primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg",
     secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700",
     danger: "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg",
-    outline:
-      "border-2 border-gray-300 hover:bg-gray-50 text-gray-700 hover:border-gray-400",
+    outline: "border-2 border-gray-300 hover:bg-gray-50 text-gray-700 hover:border-gray-400",
   };
 
   const sizes = {
@@ -31,7 +30,8 @@ const Button = ({
     <button
       onClick={onClick}
       disabled={disabled || isLoading}
-      className={`rounded-lg flex items-center justify-center gap-2 transition-all duration-200 font-semibold ${variants[variant]} ${sizes[size]} ${disabled || isLoading ? "opacity-60 cursor-not-allowed" : "active:scale-95"} ${className}`}
+      className={`rounded-lg flex items-center justify-center gap-2 transition-all duration-200 font-semibold ${variants[variant]} ${sizes[size]} ${disabled || isLoading ? "opacity-60 cursor-not-allowed" : "active:scale-95"
+        } ${className}`}
       {...props}
     >
       {isLoading ? (
@@ -39,12 +39,14 @@ const Button = ({
       ) : (
         Icon && <Icon size={18} />
       )}
+      {/* यहाँ children हुनु अनिवार्य छ जसले गर्दा बाहिरबाट पठाइएको label देखियोस् */}
       {children}
     </button>
   );
 };
 
-// Specialized Buttons
+// 2. AddButton Component
+// तपाईंको समस्या यहाँ थियो; <Button> को भित्र {label} राख्नुपर्छ।
 export const AddButton = ({
   onClick,
   label = "Add New",
@@ -52,14 +54,16 @@ export const AddButton = ({
 }) => (
   <Button
     onClick={onClick}
-    // icon={Plus}
+    icon={Plus} // यहाँ आइकन पनि थपिएको छ
     isLoading={isLoading}
     className="shadow-blue-200"
   >
+    {/* यसले गर्दा अब बटनमा टेक्स्ट देखिन्छ */}
     {isLoading ? "Adding..." : label}
   </Button>
 );
 
+// 3. ActionButtons Component (Edit/Delete)
 export const ActionButtons = ({ onEdit, onDelete, isDeleting = false }) => (
   <div className="flex items-center gap-2">
     {onEdit && (
@@ -84,19 +88,22 @@ export const ActionButtons = ({ onEdit, onDelete, isDeleting = false }) => (
   </div>
 );
 
-// Confirm Dialog with Deleting State
+// 4. Confirm Dialog Component
 export const ConfirmDialog = ({
   isOpen,
   onClose,
   onConfirm,
+  title = "Are you sure?",
+  message = "This action cannot be undone.",
   isLoading = false,
 }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-100 p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4 animate-in fade-in duration-200">
       <div className="bg-white p-8 rounded-2xl w-full max-w-md text-center shadow-2xl animate-in zoom-in-95 duration-200">
         <div
-          className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLoading ? "bg-gray-100" : "bg-red-50 text-red-500"}`}
+          className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isLoading ? "bg-gray-100" : "bg-red-50 text-red-500"
+            }`}
         >
           {isLoading ? (
             <Loader2 size={32} className="animate-spin text-gray-400" />
@@ -104,10 +111,8 @@ export const ConfirmDialog = ({
             <Trash2 size={32} />
           )}
         </div>
-        <h2 className="font-bold text-xl text-gray-800">Are you sure?</h2>
-        <p className="text-gray-500 text-sm mt-2">
-          This action cannot be undone.
-        </p>
+        <h2 className="font-bold text-xl text-gray-800">{title}</h2>
+        <p className="text-gray-500 text-sm mt-2">{message}</p>
         <div className="flex gap-3 mt-8">
           <Button
             onClick={onClose}

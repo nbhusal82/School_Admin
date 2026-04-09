@@ -18,7 +18,7 @@ const FAQPage = () => {
   const faqs = faqRes?.data || faqRes || [];
   const [createFaq, { isLoading: isCreating }] = useCreateFaqMutation();
   const [updateFaq, { isLoading: isUpdating }] = useUpdateFaqMutation();
-  const [deleteFaq] = useDeleteFaqMutation();
+  const [deleteFaq, { isLoading: isDeleting }] = useDeleteFaqMutation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState(null);
@@ -177,7 +177,7 @@ const FAQPage = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editingFaq ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editingFaq ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -192,6 +192,7 @@ const FAQPage = () => {
         onConfirm={handleDelete}
         title="Delete FAQ?"
         message="Are you sure you want to delete this FAQ? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

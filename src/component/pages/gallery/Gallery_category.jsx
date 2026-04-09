@@ -22,7 +22,7 @@ const GalleryCategory = () => {
 
   const [createCategory, { isLoading: isCreating }] =
     useCreatecategory_galleryMutation();
-  const [deleteCategory] = useDeletecategory_galleryMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDeletecategory_galleryMutation();
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdatecategory_galleryMutation();
 
@@ -195,7 +195,7 @@ const GalleryCategory = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editing ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editing ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -207,6 +207,7 @@ const GalleryCategory = () => {
         onConfirm={handleDelete}
         title="Delete Category?"
         message="Are you sure you want to delete this category? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

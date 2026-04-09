@@ -24,7 +24,7 @@ const QuestionBankAdmin = () => {
     useCreatequestion_bankMutation();
   const [updateQuestion, { isLoading: isUpdating }] =
     useUpdatequestion_bankMutation();
-  const [deleteQuestion] = useDeletequestion_bankMutation();
+  const [deleteQuestion, { isLoading: isDeleting }] = useDeletequestion_bankMutation();
   const baseurl = import.meta.env.VITE_BASE_URL;
 
   const [modal, setModal] = useState(false);
@@ -45,21 +45,21 @@ const QuestionBankAdmin = () => {
     setForm(
       question
         ? {
-            title: question.title,
-            subject: question.subject,
-            class_level: question.class_level,
-            year: question.year,
-            description: question.description,
-            file: null,
-          }
+          title: question.title,
+          subject: question.subject,
+          class_level: question.class_level,
+          year: question.year,
+          description: question.description,
+          file: null,
+        }
         : {
-            title: "",
-            subject: "",
-            class_level: "",
-            year: "",
-            description: "",
-            file: null,
-          },
+          title: "",
+          subject: "",
+          class_level: "",
+          year: "",
+          description: "",
+          file: null,
+        },
     );
     setModal(true);
   };
@@ -271,7 +271,7 @@ const QuestionBankAdmin = () => {
               className="flex-1"
               isLoading={isCreating || isUpdating}
             >
-              {editing ? "Update" : "Save"}
+              {isCreating ? "Saving..." : isUpdating ? "Updating..." : editing ? "Update" : "Save"}
             </Button>
           </div>
         </form>
@@ -286,6 +286,7 @@ const QuestionBankAdmin = () => {
         onConfirm={handleDelete}
         title="Delete Question?"
         message="Are you sure you want to delete this question? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );
