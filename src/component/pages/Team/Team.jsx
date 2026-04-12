@@ -193,7 +193,7 @@ const Team = () => {
       >
         <button
           onClick={() => navigate("/admin/team/category")}
-          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 mr-2"
+          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-none text-sm hover:bg-gray-50 mr-2"
         >
           <FolderOpen size={16} /> Categories
         </button>
@@ -238,7 +238,7 @@ const Team = () => {
       </div>
 
       {/* DATA TABLE */}
-      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="hidden lg:block">
         <Table
           columns={columns}
           data={filteredMembers}
@@ -253,7 +253,7 @@ const Team = () => {
 
       <div className="lg:hidden space-y-3">
         {filteredMembers.map((row) => (
-          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+          <div key={row.id} className="bg-white rounded-none shadow-sm border p-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3 flex-1">
                 <img src={`${imgurl}/${row.image}`} className="w-12 h-12 rounded-full object-cover border shrink-0" alt={row.name} />

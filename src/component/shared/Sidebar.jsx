@@ -102,7 +102,7 @@ const Sidebar = () => {
                 key={item.id}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-none transition-all ${
                   isActive
                     ? "bg-white text-blue-600 shadow-lg font-semibold"
                     : "hover:bg-blue-700/50 text-blue-50 hover:text-white"

@@ -1,8 +1,7 @@
 import React from "react";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 
-// 1. Base Button Component
-// यो सबै बटनहरूको जग हो जसले children, icons र loading state सम्हाल्छ।
+
 const Button = ({
   children,
   onClick,
@@ -12,6 +11,7 @@ const Button = ({
   className = "",
   disabled = false,
   isLoading = false,
+  type = "button",
   ...props
 }) => {
   const variants = {
@@ -28,9 +28,10 @@ const Button = ({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled || isLoading}
-      className={`rounded-lg flex items-center justify-center gap-2 transition-all duration-200 font-semibold ${variants[variant]} ${sizes[size]} ${disabled || isLoading ? "opacity-60 cursor-not-allowed" : "active:scale-95"
+      className={`rounded-none flex items-center justify-center gap-2 transition-all duration-200 font-semibold ${variants[variant]} ${sizes[size]} ${disabled || isLoading ? "opacity-60 cursor-not-allowed" : "active:scale-95"
         } ${className}`}
       {...props}
     >
@@ -39,14 +40,12 @@ const Button = ({
       ) : (
         Icon && <Icon size={18} />
       )}
-      {/* यहाँ children हुनु अनिवार्य छ जसले गर्दा बाहिरबाट पठाइएको label देखियोस् */}
       {children}
     </button>
   );
 };
 
-// 2. AddButton Component
-// तपाईंको समस्या यहाँ थियो; <Button> को भित्र {label} राख्नुपर्छ।
+
 export const AddButton = ({
   onClick,
   label = "Add New",
@@ -58,32 +57,32 @@ export const AddButton = ({
     isLoading={isLoading}
     className="shadow-blue-200"
   >
-    {/* यसले गर्दा अब बटनमा टेक्स्ट देखिन्छ */}
+  
     {isLoading ? "Adding..." : label}
   </Button>
 );
 
 // 3. ActionButtons Component (Edit/Delete)
 export const ActionButtons = ({ onEdit, onDelete, isDeleting = false }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center whitespace-nowrap">
     {onEdit && (
-      <Button
+      <button
         onClick={onEdit}
-        variant="outline"
-        size="sm"
-        icon={Pencil}
-        className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
-      />
+        type="button"
+        className="cursor-pointer text-blue-600 font-medium text-sm mr-4 transition-colors hover:text-blue-700"
+      >
+        Edit
+      </button>
     )}
     {onDelete && (
-      <Button
+      <button
         onClick={onDelete}
-        variant="outline"
-        size="sm"
-        icon={Trash2}
-        className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-        isLoading={isDeleting}
-      />
+        type="button"
+        disabled={isDeleting}
+        className="cursor-pointer text-red-600 font-medium text-sm transition-colors hover:text-red-700 disabled:opacity-50"
+      >
+        {isDeleting ? "Deleting..." : "Delete"}
+      </button>
     )}
   </div>
 );

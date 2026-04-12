@@ -154,7 +154,7 @@ const BlogManagement = () => {
         <div className="flex gap-2">
           <button
             onClick={() => navigate("/admin/blog/category")}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-none text-sm hover:bg-gray-50"
           >
             <FolderOpen size={16} /> Categories
           </button>
@@ -164,7 +164,7 @@ const BlogManagement = () => {
       </div>
 
       {/* TABLE */}
-      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="hidden lg:block">
         <Table
           columns={columns}
           data={blogs}
@@ -182,7 +182,7 @@ const BlogManagement = () => {
 
       <div className="lg:hidden space-y-3">
         {blogs.map((row, index) => (
-          <div key={row.id} className="bg-white rounded-xl shadow-sm border p-4">
+          <div key={row.id} className="bg-white rounded-none shadow-sm border p-4">
             <div className="flex justify-between items-start">
               <div className="flex items-start gap-3 flex-1">
                 <img
