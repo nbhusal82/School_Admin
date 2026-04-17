@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Ensure the correct base path (adjust if your site is inside a subdirectory)
+  RewriteBase /
+
+  # Force HTTPS and remove www
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+  RewriteRule ^(.*)$ https://admin.namunavidhyasadan.com/$1 [R=301,L]
+
+  # Redirect to index.html for React frontend routes
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ /index.html [L,QSA]
+
+  # Serve index.html as fallback
+  FallbackResource /index.html
+</IfModule>
